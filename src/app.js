@@ -1931,8 +1931,6 @@ const Input = {
       ) {
         e.preventDefault();
         Flow.undo();
-      } else if (e.key === "Escape") {
-        UI.openMenu();
       } else if (e.key === "1") {
         Flow.buyPeasant();
       } else if (e.key === "2") {
