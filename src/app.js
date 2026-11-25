@@ -75,6 +75,14 @@ const Store = {
       localStorage.removeItem(Store.key(name));
     } catch (e) {}
   },
+  trySet(name, value) {
+    try {
+      localStorage.setItem(Store.key(name), JSON.stringify(value));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
 };
 
 App.activeIsHuman = function () {
@@ -800,6 +808,8 @@ const Flow = {
   beginGame(cfg, challenge) {
     App.challengeReported = false;
     App.undoStack = [];
+    Store.remove("game");
+    Store.remove("save");
     App.gameOverShown = false;
     App.spectating = false;
     App.gs = Flow.setupFromConfig(cfg);
@@ -854,20 +864,37 @@ const Flow = {
     Flow.saveGame();
   },
 
+  clearUndo() {
+    const had = App.undoStack.length > 0;
+    App.undoStack = [];
+    if (!had) return;
+    const bundle = Store.get("game", null);
+    if (bundle) Store.trySet("game", { save: bundle.save, undo: [] });
+  },
+
   saveGame() {
-    if (App.gs && !Flow.isGameOver()) {
-      Store.set("save", Flow.snapshot());
+    if (!App.gs || Flow.isGameOver()) return;
+    const stack = App.undoStack;
+    const bundle = { save: Flow.snapshot(), undo: stack };
+    if (!Store.trySet("game", bundle)) {
+      App.undoStack = [];
+      if (!Store.trySet("game", { save: bundle.save, undo: null })) {
+        Store.set("save", bundle.save);
+      }
     }
   },
 
   restoreIfAny() {
-    const save = Store.get("save", null);
+    const bundle = Store.get("game", null);
+    const save = bundle ? bundle.save : Store.get("save", null);
     if (!save) return false;
     try {
       const gs = GameStateHelper.fromSerialized(save);
       if (!gs || !gs.tiles || gs.tiles.length === 0) return false;
       App.gs = gs;
-      App.undoStack = [];
+      App.undoStack = (
+        bundle && Array.isArray(bundle.undo) ? bundle.undo : []
+      ).slice();
       hideAllOverlays();
       show("hud");
       layoutForMap(gs);
@@ -970,7 +997,7 @@ const Flow = {
     // end the bot's turn
     GameStateHelper.endTurn(App.gs);
     App.gs.activeKingdom = null;
-    App.undoStack = [];
+    Flow.clearUndo();
     UI.onGameStateChanged(false);
     if (Flow.checkGameEnd()) return;
     if (App.activeIsHuman() && App.gs.heldObject == null) {
@@ -1153,6 +1180,7 @@ const Flow = {
     }
     const snap = App.undoStack.pop();
     App.gs = GameStateHelper.fromSerialized(snap);
+    App.lastTap = { key: null, time: 0 };
     UI.onGameStateChanged(false);
     Flow.saveGame();
   },
@@ -1178,7 +1206,7 @@ const Flow = {
 
   endTurn(auto) {
     if (!App.gs) return;
-    App.undoStack = [];
+    Flow.clearUndo();
     GameStateHelper.endTurn(App.gs);
     App.gs.activeKingdom = null;
     App.lastTap = { key: null, time: 0 };
@@ -1685,6 +1713,8 @@ const UI = {
     };
     add(t("over.newGame"), "", () => {
       Store.remove("save");
+      Store.remove("game");
+      Flow.clearUndo();
       App.gs = null;
       showOverlayOnly("setup");
       Setup.setMode(false);
@@ -1692,6 +1722,8 @@ const UI = {
     });
     add(t("over.mainMenu"), "subtle", () => {
       Store.remove("save");
+      Store.remove("game");
+      Flow.clearUndo();
       App.gs = null;
       showOverlayOnly("menu");
     });
@@ -1718,6 +1750,8 @@ const UI = {
         label: t("over.newGame"),
         action: () => {
           Store.remove("save");
+          Store.remove("game");
+          Flow.clearUndo();
           App.gs = null;
           showOverlayOnly("setup");
           Setup.setMode(false);
@@ -1729,6 +1763,8 @@ const UI = {
         subtle: true,
         action: () => {
           Store.remove("save");
+          Store.remove("game");
+          Flow.clearUndo();
           App.gs = null;
           showOverlayOnly("menu");
         },
@@ -2154,6 +2190,8 @@ function wireMenu() {
                   Flow.reportChallengeEnd(false, App.gs.round, true);
                 Flow.stopEnemyTurn();
                 Store.remove("save");
+                Store.remove("game");
+                Flow.clearUndo();
                 App.gs = null;
                 hide("hud");
                 UI.openMenu();
