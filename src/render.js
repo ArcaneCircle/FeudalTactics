@@ -474,15 +474,17 @@ class MapRenderer {
     }
   }
 
-  _cyanRegion(name, frame) {
-    const key = "cyan|" + name + "|" + frame;
+  // Multiplies the region's RGB by a tint, exactly like SpriteBatch.setColor():
+  // the sprite's own brightness survives and the alpha channel is left untouched.
+  _rgbTintedRegion(name, frame, rgb) {
+    const key = "rgbtint|" + name + "|" + frame + "|" + rgb;
     let c = this.imageCache.get(key);
     if (c) return c;
     const r = TextureAtlasHelper.region(name, frame);
     c = document.createElement("canvas");
     c.width = r[2];
     c.height = r[3];
-    const cx = c.getContext("2d");
+    const cx = c.getContext("2d", { willReadFrequently: true });
     cx.drawImage(
       TextureAtlasHelper.atlas,
       r[0],
@@ -494,9 +496,14 @@ class MapRenderer {
       r[2],
       r[3],
     );
-    cx.globalCompositeOperation = "source-atop";
-    cx.fillStyle = "rgb(0,255,255)";
-    cx.fillRect(0, 0, c.width, c.height);
+    const img = cx.getImageData(0, 0, c.width, c.height);
+    const d = img.data;
+    for (let i = 0; i < d.length; i += 4) {
+      d[i] = (d[i] * rgb[0]) / 255;
+      d[i + 1] = (d[i + 1] * rgb[1]) / 255;
+      d[i + 2] = (d[i + 2] * rgb[2]) / 255;
+    }
+    cx.putImageData(img, 0, 0);
     this.imageCache.set(key, c);
     return c;
   }
@@ -505,15 +512,14 @@ class MapRenderer {
     const ctx = this.ctx;
     const cam = this.camera;
     const scale = 1 / cam.zoom;
-    const waterImg = this._cyanRegion("beach_water", frameIdx % 2);
-    const sandImg = this._tintedRegion(
-      "beach_sand",
+    const waterImg = this._rgbTintedRegion(
+      "beach_water",
       frameIdx % 2,
-      null,
-      null,
-      null,
+      items.darkenBeaches ? [0, 191, 191] : [0, 255, 255],
     );
-    const darken = items.darkenBeaches;
+    const sandImg = items.darkenBeaches
+      ? this._rgbTintedRegion("beach_sand", frameIdx % 2, [128, 128, 128])
+      : this._tintedRegion("beach_sand", frameIdx % 2, null, null, null);
 
     const drawRegion = (img, wx, wy, w, h, flipH, flipV) => {
       const f = this._flipped(img, flipH, flipV);
@@ -521,101 +527,24 @@ class MapRenderer {
       ctx.drawImage(f, p.x, p.y, w * scale, h * scale);
     };
 
-    // 1. cyan glow in the water around the coast (upstream draws it first)
-    ctx.save();
-    ctx.globalAlpha = darken ? 0.55 : 0.8;
-    for (const tile of items.tiles.values()) {
-      const mc = tile.mapCoords;
-      if (tile.bottomBeach || tile.bottomRightBeach)
-        drawRegion(
-          waterImg,
-          mc.x,
-          mc.y - HEXTILE_HEIGHT * 2,
-          HEXTILE_WIDTH * 2,
-          HEXTILE_HEIGHT * 2,
-          false,
-          false,
-        );
-      if (tile.bottomBeach || tile.bottomLeftBeach)
-        drawRegion(
-          waterImg,
-          mc.x - HEXTILE_WIDTH * 2,
-          mc.y - HEXTILE_HEIGHT * 2,
-          HEXTILE_WIDTH * 2,
-          HEXTILE_HEIGHT * 2,
-          true,
-          false,
-        );
-      if (tile.topBeach || tile.topLeftBeach)
-        drawRegion(
-          waterImg,
-          mc.x - HEXTILE_WIDTH * 2,
-          mc.y,
-          HEXTILE_WIDTH * 2,
-          HEXTILE_HEIGHT * 2,
-          true,
-          true,
-        );
-      if (tile.topBeach || tile.topRightBeach)
-        drawRegion(
-          waterImg,
-          mc.x,
-          mc.y,
-          HEXTILE_WIDTH * 2,
-          HEXTILE_HEIGHT * 2,
-          false,
-          true,
-        );
-    }
-    ctx.restore();
-
-    // 2. sand strips on top of the glow
-    ctx.save();
-    if (darken) ctx.globalAlpha = 0.5;
-    for (const tile of items.tiles.values()) {
-      const mc = tile.mapCoords;
-      if (tile.bottomBeach || tile.bottomRightBeach)
-        drawRegion(
-          sandImg,
-          mc.x,
-          mc.y - HEXTILE_HEIGHT,
-          HEXTILE_WIDTH,
-          HEXTILE_HEIGHT,
-          false,
-          false,
-        );
-      if (tile.bottomBeach || tile.bottomLeftBeach)
-        drawRegion(
-          sandImg,
-          mc.x - HEXTILE_WIDTH,
-          mc.y - HEXTILE_HEIGHT,
-          HEXTILE_WIDTH,
-          HEXTILE_HEIGHT,
-          true,
-          false,
-        );
-      if (tile.topBeach || tile.topLeftBeach)
-        drawRegion(
-          sandImg,
-          mc.x - HEXTILE_WIDTH,
-          mc.y,
-          HEXTILE_WIDTH,
-          HEXTILE_HEIGHT,
-          true,
-          true,
-        );
-      if (tile.topBeach || tile.topRightBeach)
-        drawRegion(
-          sandImg,
-          mc.x,
-          mc.y,
-          HEXTILE_WIDTH,
-          HEXTILE_HEIGHT,
-          false,
-          true,
-        );
-    }
-    ctx.restore();
+    // Cyan glow in the water, then the sand strips on top of it.
+    const drawCoast = (img, sizeFactor) => {
+      const w = HEXTILE_WIDTH * sizeFactor;
+      const h = HEXTILE_HEIGHT * sizeFactor;
+      for (const tile of items.tiles.values()) {
+        const mc = tile.mapCoords;
+        if (tile.bottomBeach || tile.bottomRightBeach)
+          drawRegion(img, mc.x, mc.y - h, w, h, false, false);
+        if (tile.bottomBeach || tile.bottomLeftBeach)
+          drawRegion(img, mc.x - w, mc.y - h, w, h, true, false);
+        if (tile.topBeach || tile.topLeftBeach)
+          drawRegion(img, mc.x - w, mc.y, w, h, true, true);
+        if (tile.topBeach || tile.topRightBeach)
+          drawRegion(img, mc.x, mc.y, w, h, false, true);
+      }
+    };
+    drawCoast(waterImg, 2);
+    drawCoast(sandImg, 1);
   }
 
   // The original draws these with ShapeRenderer.rectLine(): a filled quad of
