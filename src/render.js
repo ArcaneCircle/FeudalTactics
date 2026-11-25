@@ -171,6 +171,23 @@ class MapRenderer {
     this.imageCache = new Map(); // tinted variant cache
     this.patternCanvas = null;
     this.dpr = 1;
+    this._setNearest();
+  }
+
+  _setNearest() {
+    this.ctx.imageSmoothingEnabled = false;
+  }
+
+  syncCanvasSize(w, h) {
+    const bw = Math.round(w);
+    const bh = Math.round(h);
+    if (this.canvas.width !== bw || this.canvas.height !== bh) {
+      this.canvas.width = bw;
+      this.canvas.height = bh;
+      // Assigning canvas.width/height clears the canvas and resets the whole
+      // 2D context state, including imageSmoothingEnabled, so set it again.
+      this._setNearest();
+    }
   }
 
   updateGameState(gs) {
@@ -179,8 +196,7 @@ class MapRenderer {
 
   resize(w, h, dpr) {
     this.dpr = dpr;
-    this.canvas.width = Math.round(w * dpr);
-    this.canvas.height = Math.round(h * dpr);
+    this.syncCanvasSize(w * dpr, h * dpr);
     this.canvas.style.width = w + "px";
     this.canvas.style.height = h + "px";
     this.camera.setViewport(w, h);
@@ -305,17 +321,10 @@ class MapRenderer {
   }
 
   // draw a sprite frame in world coords: bottom-left (wx, wy), world size (w, h)
-  _drawWorld(img, wx, wy, w, h, smooth) {
+  _drawWorld(img, wx, wy, w, h) {
     const topLeft = this.camera.worldToScreen(wx, wy + h);
     const scale = 1 / this.camera.zoom;
-    // The original loads its atlas without setting a filter, so libGDX textures
-    // use Nearest: pixels stay crisp and tile edges are not smeared. Sprites are
-    // smooth by default here; callers can ask for nearest (map tiles do).
-    const ctx = this.ctx;
-    const prev = ctx.imageSmoothingEnabled;
-    ctx.imageSmoothingEnabled = smooth === true;
-    ctx.drawImage(img, topLeft.x, topLeft.y, w * scale, h * scale);
-    ctx.imageSmoothingEnabled = prev;
+    this.ctx.drawImage(img, topLeft.x, topLeft.y, w * scale, h * scale);
   }
 
   render(dt) {
@@ -360,7 +369,6 @@ class MapRenderer {
         tile.mapCoords.y - th / 2,
         tw,
         th,
-        false,
       );
     }
 
@@ -524,7 +532,19 @@ class MapRenderer {
     const drawRegion = (img, wx, wy, w, h, flipH, flipV) => {
       const f = this._flipped(img, flipH, flipV);
       const p = cam.worldToScreen(wx, wy + h);
-      ctx.drawImage(f, p.x, p.y, w * scale, h * scale);
+      const dpr = this.dpr;
+      const snap = (v) => Math.round(v * dpr) / dpr;
+      const x0 = snap(p.x);
+      const y0 = snap(p.y);
+      const x1 = snap(p.x + w * scale);
+      const y1 = snap(p.y + h * scale);
+      ctx.drawImage(
+        f,
+        x0,
+        y0,
+        Math.max(1 / dpr, x1 - x0),
+        Math.max(1 / dpr, y1 - y0),
+      );
     };
 
     // Cyan glow in the water, then the sand strips on top of it.
