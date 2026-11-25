@@ -4,6 +4,9 @@ A webxdc port of [Feudal Tactics](https://github.com/Sesu8642/FeudalTactics):
 a small medieval strategy game on a random hex island,
 with rules inspired by Sean O'Connor's _Slay_.
 
+This port includes additional features like a list of shared challenges
+and an unique daily challenge every day.
+
 ## Controls
 
 | Action                                     | Touch / mouse                                        | Keyboard               |
