@@ -169,7 +169,7 @@ export const I18N = (() => {
       "howto.p6":
         "<b>Capitals:</b> if a capital is destroyed (or a tile is cut off), the kingdom's savings are lost and a new capital is placed. If a kingdom is split, only the part with the capital keeps the money.",
       "howto.p7":
-        "<b>Trees</b> block income. Palm trees grow on coast and spread every round; oak trees spread when two are adjacent. Place a unit on a tree to chop it (the unit cannot act afterwards). <b>Gravestones</b> appear when units can't be paid and turn into trees.",
+        "<b>Trees</b> block income. Palm trees grow on coast and spread every round; pine trees spread when two are adjacent. Place a unit on a tree to chop it (the unit cannot act afterwards). <b>Gravestones</b> appear when units can't be paid and turn into trees.",
       "howto.p8":
         "<b>Controls:</b> tap a tile to select a kingdom, tap a unit to pick it up and tap a target to place/conquer/combine. Double-tap an empty tile of the selected kingdom to buy and place a peasant at once. Buy buttons are at the bottom (right-click = peasant, middle-click = tower, long press also buys a tower). Undo works within your turn and the game is saved automatically.",
       "howto.p9":
@@ -354,7 +354,7 @@ export const I18N = (() => {
       "howto.p6":
         "<b>Hauptstädte:</b> Wird eine Hauptstadt zerstört (oder ein Feld abgeschnitten), sind die Ersparnisse des Königreichs verloren und eine neue Hauptstadt wird gesetzt. Wird ein Königreich geteilt, behält nur der Teil mit der Hauptstadt das Geld.",
       "howto.p7":
-        "<b>Bäume</b> blockieren das Einkommen. Palmen wachsen an der Küste und breiten sich jede Runde aus; Eichen breiten sich aus, wenn zwei nebeneinander stehen. Setze eine Einheit auf einen Baum, um ihn zu fällen (die Einheit kann danach nicht mehr handeln). <b>Grabsteine</b> erscheinen, wenn Einheiten nicht bezahlt werden können, und werden zu Bäumen.",
+        "<b>Bäume</b> blockieren das Einkommen. Palmen wachsen an der Küste und breiten sich jede Runde aus; Kiefern breiten sich aus, wenn zwei nebeneinander stehen. Setze eine Einheit auf einen Baum, um ihn zu fällen (die Einheit kann danach nicht mehr handeln). <b>Grabsteine</b> erscheinen, wenn Einheiten nicht bezahlt werden können, und werden zu Bäumen.",
       "howto.p8":
         "<b>Steuerung:</b> Tippe ein Feld an, um ein Königreich zu wählen, tippe eine Einheit an, um sie aufzunehmen, und tippe ein Ziel an, um sie zu setzen, zu erobern oder zu vereinen. Doppeltippe auf ein leeres Feld des gewählten Königreichs, um einen Bauern zu kaufen und sofort zu setzen. Die Kauftasten sind unten (Rechtsklick = Bauer, Mittelklick = Turm, langes Drücken kauft ebenfalls einen Turm). Rückgängig gilt innerhalb deines Zuges, und das Spiel wird automatisch gesichert.",
       "howto.p9":
@@ -533,7 +533,7 @@ export const I18N = (() => {
       "howto.p6":
         "<b>Capitales :</b> si une capitale est détruite (ou qu'une case est isolée), les économies du royaume sont perdues et une nouvelle capitale est placée. Si un royaume est coupé en deux, seule la partie avec la capitale garde l'argent.",
       "howto.p7":
-        "<b>Les arbres</b> bloquent le revenu. Les palmiers poussent sur la côte et se répandent à chaque manche ; les chênes se répandent quand deux sont voisins. Place une unité sur un arbre pour l'abattre (l'unité ne peut plus agir ensuite). Les <b>pierres tombales</b> apparaissent quand des unités ne peuvent pas être payées et deviennent des arbres.",
+        "<b>Les arbres</b> bloquent le revenu. Les palmiers poussent sur la côte et se répandent à chaque manche ; les pins se répandent quand deux sont voisins. Place une unité sur un arbre pour l'abattre (l'unité ne peut plus agir ensuite). Les <b>pierres tombales</b> apparaissent quand des unités ne peuvent pas être payées et deviennent des arbres.",
       "howto.p8":
         "<b>Commandes :</b> touche une case pour sélectionner un royaume, touche une unité pour la prendre et touche une cible pour la placer, conquérir ou fusionner. Touche deux fois une case vide du royaume sélectionné pour acheter et placer un paysan d'un coup. Les boutons d'achat sont en bas (clic droit = paysan, clic du milieu = tour, un appui long achète aussi une tour). L'annulation fonctionne pendant ton tour et la partie est enregistrée automatiquement.",
       "howto.p9":
@@ -712,7 +712,7 @@ export const I18N = (() => {
       "howto.p6":
         "<b>Capitali:</b> se una capitale viene distrutta (o una casella viene isolata), i risparmi del regno vanno persi e viene collocata una nuova capitale. Se un regno viene diviso, solo la parte con la capitale mantiene il denaro.",
       "howto.p7":
-        "<b>Gli alberi</b> bloccano le entrate. Le palme crescono sulla costa e si diffondono ogni round; le querce si diffondono quando due sono adiacenti. Posiziona un'unità su un albero per abbatterlo (l'unità poi non può più agire). Le <b>lapidi</b> compaiono quando le unità non possono essere pagate e diventano alberi.",
+        "<b>Gli alberi</b> bloccano le entrate. Le palme crescono sulla costa e si diffondono ogni round; i pini si diffondono quando due sono adiacenti. Posiziona un'unità su un albero per abbatterlo (l'unità poi non può più agire). Le <b>lapidi</b> compaiono quando le unità non possono essere pagate e diventano alberi.",
       "howto.p8":
         "<b>Comandi:</b> tocca una casella per scegliere un regno, tocca un'unità per prenderla e tocca un bersaglio per posizionarla, conquistare o unire. Tocca due volte una casella vuota del regno scelto per comprare e posizionare subito un contadino. I pulsanti di acquisto sono in basso (clic destro = contadino, clic centrale = torre, anche la pressione prolungata compra una torre). L'annullamento vale nel tuo turno e la partita viene salvata automaticamente.",
       "howto.p9":
@@ -893,7 +893,7 @@ export const I18N = (() => {
       "howto.p6":
         "<b>Capitales:</b> si se destruye una capital (o se aísla una casilla), los ahorros del reino se pierden y se coloca una nueva capital. Si un reino se divide, solo la parte con la capital conserva el dinero.",
       "howto.p7":
-        "<b>Los árboles</b> bloquean los ingresos. Las palmeras crecen en la costa y se extienden cada ronda; los robles se extienden cuando dos están juntos. Coloca una unidad sobre un árbol para talarlo (la unidad ya no podrá actuar). Las <b>lápidas</b> aparecen cuando no se pueden pagar unidades y se convierten en árboles.",
+        "<b>Los árboles</b> bloquean los ingresos. Las palmeras crecen en la costa y se extienden cada ronda; los pinos se extienden cuando dos están juntos. Coloca una unidad sobre un árbol para talarlo (la unidad ya no podrá actuar). Las <b>lápidas</b> aparecen cuando no se pueden pagar unidades y se convierten en árboles.",
       "howto.p8":
         "<b>Controles:</b> toca una casilla para seleccionar un reino, toca una unidad para cogerla y toca un objetivo para colocarla, conquistar o combinar. Toca dos veces una casilla vacía del reino seleccionado para comprar y colocar un campesino de una vez. Los botones de compra están abajo (clic derecho = campesino, clic central = torre, una pulsación larga también compra una torre). Deshacer funciona durante tu turno y la partida se guarda automáticamente.",
       "howto.p9":
@@ -1072,7 +1072,7 @@ export const I18N = (() => {
       "howto.p6":
         "<b>Capitais:</b> se uma capital for destruída (ou uma casinha ficar isolada), as poupanças do reino perdem-se e é colocada uma nova capital. Se um reino for dividido, só a parte com a capital fica com o dinheiro.",
       "howto.p7":
-        "<b>As árvores</b> bloqueiam o rendimento. As palmeiras crescem na costa e espalham-se em cada ronda; os carvalhos espalham-se quando estão dois juntos. Coloca uma unidade sobre uma árvore para a cortar (a unidade já não pode agir). As <b>lápides</b> aparecem quando as unidades não podem ser pagas e transformam-se em árvores.",
+        "<b>As árvores</b> bloqueiam o rendimento. As palmeiras crescem na costa e espalham-se em cada ronda; os pinheiros espalham-se quando estão dois juntos. Coloca uma unidade sobre uma árvore para a cortar (a unidade já não pode agir). As <b>lápides</b> aparecem quando as unidades não podem ser pagas e transformam-se em árvores.",
       "howto.p8":
         "<b>Controlos:</b> toca numa casinha para selecionar um reino, toca numa unidade para a pegar e toca num alvo para a colocar, conquistar ou combinar. Toca duas vezes numa casinha vazia do reino selecionado para comprar e colocar um camponês de uma vez. Os botões de compra estão em baixo (clique direito = camponês, clique do meio = torre, um toque longo também compra uma torre). O desfazer funciona dentro do teu turno e o jogo é guardado automaticamente.",
       "howto.p9":
