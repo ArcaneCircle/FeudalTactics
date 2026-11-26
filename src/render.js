@@ -33,7 +33,10 @@ const TILE_CONTENT_OFFSET_Y = HEXTILE_HEIGHT * -0.075;
 const TextureAtlasHelper = {
   atlas: null,
   regions: {
-    baron: [2, 2, 64, 55],
+    baron: [
+      [2, 2, 64, 55],
+      [200, 11, 64, 55],
+    ],
     beach_sand: [
       [262, 189, 64, 64],
       [328, 189, 64, 64],
@@ -45,11 +48,20 @@ const TextureAtlasHelper = {
     capital: [200, 68, 64, 55],
     castle: [332, 18, 64, 55],
     gravestone: [394, 198, 64, 55],
-    knight: [68, 2, 64, 55],
+    knight: [
+      [68, 2, 64, 55],
+      [266, 18, 64, 55],
+    ],
     palm_tree: [262, 132, 64, 55],
-    peasant: [134, 2, 64, 55],
+    peasant: [
+      [266, 75, 64, 55],
+      [134, 2, 64, 55],
+    ],
     shield: [460, 237, 16, 16],
-    spearman: [328, 132, 64, 55],
+    spearman: [
+      [328, 132, 64, 55],
+      [332, 75, 64, 55],
+    ],
     tile_bw: [2, 59, 64, 64],
     tree: [394, 141, 64, 55],
     water: [
