@@ -380,11 +380,11 @@ const Daily = {
     return key || Daily.SETUP.botLevel;
   },
 
-  // "hard mode" from LEVEL_3
+  // "hard mode" from LEVEL_3, in the player's language
   modeLabel(difficulty) {
     const name =
       (INTELLIGENCE[Daily.difficultyOf(difficulty)] || {}).name || "?";
-    return name.toLowerCase() + " mode";
+    return t("mode.label", { mode: name });
   },
 
   meta(key) {
@@ -1411,9 +1411,9 @@ const Setup = {
       title.textContent =
         on === "daily"
           ? dailyDay && dailyDay !== Daily.key()
-            ? t("setup.dailyTitle") + " · " + Daily.label(dailyDay)
-            : t("setup.dailyTitle")
-          : t("setup.title");
+            ? t("menu.daily") + " · " + Daily.label(dailyDay)
+            : t("menu.daily")
+          : t("menu.newGame");
     }
     const banner = $("setup-challenge-note");
     if (banner) {
@@ -1802,7 +1802,7 @@ const UI = {
   showDefeatedDialog() {
     const gs = App.gs;
     const round = Flow.human().roundOfDefeat || gs.round;
-    dialog(t("dlg.defeat.title"), t("dlg.defeat.text", { round }), [
+    dialog(t("over.defeatTitle"), t("dlg.defeat.text", { round }), [
       {
         label: t("hud.spectating"),
         primary: true,
@@ -2237,7 +2237,7 @@ function wireMenu() {
     // everyone already has it, so sharing would post a duplicate map into the
     // chat. The row is left out entirely rather than shown disabled.
     const inDaily = Flow.isDaily(App.gs);
-    dialog(t("dlg.menu.title"), "", [
+    dialog(t("hud.menu"), "", [
       {
         label: t("dlg.menu.share"),
         primary: true,
@@ -2268,7 +2268,7 @@ function wireMenu() {
         },
       },
       {
-        label: t("dlg.menu.howto"),
+        label: t("howto.title"),
         action: () => {
           hide("hud");
           show("howto");

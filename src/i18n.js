@@ -5,7 +5,6 @@ export const I18N = (() => {
       "menu.newGame": "New Game",
       "menu.daily": "Challenge of the Day",
       "menu.challenges": "Challenges",
-      "menu.howto": "How to Play",
       "menu.settings": "Settings",
       "menu.about": "About",
       "ui.back": "Back",
@@ -13,8 +12,6 @@ export const I18N = (() => {
       "ui.cancel": "Cancel",
       "ui.play": "Play",
       "ui.expired": "Expired",
-      "ui.menu": "Menu",
-      "ui.howto": "How to play",
 
       "settings.showEnemyTurns": "Show enemy turns",
       "settings.enemySpeed": "Enemy turn speed",
@@ -31,7 +28,6 @@ export const I18N = (() => {
         "<b>Challenges:</b> inside a messenger you can share a map to the chat and compare results with everyone who plays it.",
 
       "hud.menu": "Menu",
-      "hud.help": "How to play",
       "hud.undo": "Undo (Backspace)",
       "hud.buyPeasant": "Buy peasant (right click / 1)",
       "hud.buyTower": "Buy tower (middle click / 2)",
@@ -49,8 +45,6 @@ export const I18N = (() => {
       "hud.savings": "Savings: {savings} ({balance})",
       "hud.selectKingdom": "Select a kingdom.",
       "hud.allMovesDone": "All moves done — press ➜ to end your turn.",
-
-      "setup.title": "New Game",
       "setup.color": "Your color",
       "setup.difficulty": "Enemy difficulty",
       "setup.mapsize": "Map size",
@@ -61,7 +55,6 @@ export const I18N = (() => {
       "setup.startChallenge": "Start challenge",
       "setup.randomSeed": "Generate a random seed",
       "setup.player": "Player {n}",
-      "setup.dailyTitle": "Challenge of the Day",
       "setup.dailyNote":
         "Challenge of the day — one map for everyone today. You may pick the <strong>difficulty</strong>; it is shown with your result. Press <strong>Start challenge</strong> to play it.",
       "setup.pastDailyNote":
@@ -82,8 +75,8 @@ export const I18N = (() => {
       "density.MEDIUM": "Moderate",
       "density.DENSE": "Compact",
 
-      "mode.suffix": "in {modeLower} mode",
       "mode.label": "{modeLower} mode",
+      "mode.suffix": "in {modeLower} mode",
 
       "chat.sharedChallenge":
         "{name} shared a challenge • difficulty {difficultyLower}, size {sizeLower}, {players} players, seed {seed}",
@@ -115,22 +108,18 @@ export const I18N = (() => {
       "toast.placeFirst": "Place your object on the map first.",
       "toast.noShareable": "This game has no shareable settings.",
       "toast.challengeShared": "Challenge shared to the chat!",
-      "toast.resultShared": "Result shared",
 
       "dlg.endTurn.title": "End turn?",
       "dlg.endTurn.text":
         "You might have forgotten to do your moves for a kingdom.\n\nAre you sure you want to end your turn?",
       "dlg.endTurn.yes": "Yes, end turn",
       "dlg.endTurn.keep": "Keep playing",
-      "dlg.menu.title": "Menu",
       "dlg.menu.share": "Share challenge to chat",
       "dlg.menu.resign": "Resign (back to menu)",
-      "dlg.menu.howto": "How to play",
       "dlg.menu.close": "Close menu",
       "dlg.resign.title": "Resign?",
       "dlg.resign.text": "Your progress will be lost. Are you sure?",
       "dlg.resign.confirm": "Resign",
-      "dlg.defeat.title": "DEFEAT!",
       "dlg.defeat.text":
         "All your kingdoms were conquered by the enemy in round {round}.",
 
@@ -142,12 +131,8 @@ export const I18N = (() => {
       "over.enemyMajority":
         "Your enemy conquered a majority of the territory in round {round}.",
       "over.allConquered": "All your kingdoms were conquered in round {round}.",
-      "over.shareResult": "Share result to chat",
-      "over.shareChallenge": "Share challenge to chat",
       "over.newGame": "New game",
       "over.mainMenu": "Main menu",
-
-      "list.title": "Challenges",
       "list.intro":
         "Maps shared in this chat. Play the exact same island and settings. Your best result is sent back to the chat.",
       "list.empty":
@@ -196,7 +181,6 @@ export const I18N = (() => {
       "menu.newGame": "Neues Spiel",
       "menu.daily": "Herausforderung des Tages",
       "menu.challenges": "Herausforderungen",
-      "menu.howto": "Spielanleitung",
       "menu.settings": "Einstellungen",
       "menu.about": "Über",
       "ui.back": "Zurück",
@@ -204,8 +188,6 @@ export const I18N = (() => {
       "ui.cancel": "Abbrechen",
       "ui.play": "Spielen",
       "ui.expired": "Abgelaufen",
-      "ui.menu": "Menü",
-      "ui.howto": "Spielanleitung",
 
       "settings.showEnemyTurns": "Gegnerzüge anzeigen",
       "settings.enemySpeed": "Geschwindigkeit der Gegnerzüge",
@@ -223,7 +205,6 @@ export const I18N = (() => {
         "<b>Herausforderungen:</b> In einem Messenger kannst du eine Karte in den Chat teilen und Ergebnisse mit allen vergleichen, die sie spielen.",
 
       "hud.menu": "Menü",
-      "hud.help": "Spielanleitung",
       "hud.undo": "Rückgängig (Backspace)",
       "hud.buyPeasant": "Bauern kaufen (Rechtsklick / 1)",
       "hud.buyTower": "Turm kaufen (Mittelklick / 2)",
@@ -242,8 +223,6 @@ export const I18N = (() => {
       "hud.selectKingdom": "Wähle ein Königreich.",
       "hud.allMovesDone":
         "Alle Züge erledigt — drücke ➜, um deinen Zug zu beenden.",
-
-      "setup.title": "Neues Spiel",
       "setup.color": "Deine Farbe",
       "setup.difficulty": "Gegnerstärke",
       "setup.mapsize": "Kartengröße",
@@ -254,7 +233,6 @@ export const I18N = (() => {
       "setup.startChallenge": "Herausforderung starten",
       "setup.randomSeed": "Zufälligen Seed erzeugen",
       "setup.player": "Spieler {n}",
-      "setup.dailyTitle": "Herausforderung des Tages",
       "setup.dailyNote":
         "Herausforderung des Tages — eine Karte für alle heute. Du darfst die <strong>Schwierigkeit</strong> wählen; sie wird mit deinem Ergebnis angezeigt. Drücke <strong>Herausforderung starten</strong>, um sie zu spielen.",
       "setup.pastDailyNote":
@@ -275,8 +253,8 @@ export const I18N = (() => {
       "density.MEDIUM": "Mäßig",
       "density.DENSE": "Kompakt",
 
-      "mode.suffix": "{mode} als Modus",
-      "mode.label": "{mode} als Modus",
+      "mode.label": "Modus: {mode}",
+      "mode.suffix": "im Modus {mode}",
 
       "chat.sharedChallenge":
         "{name} hat eine Herausforderung geteilt • {difficulty} als Schwierigkeit, {size} als Größe, {players} Spieler, Seed {seed}",
@@ -314,22 +292,18 @@ export const I18N = (() => {
       "toast.placeFirst": "Platziere zuerst dein Objekt auf der Karte.",
       "toast.noShareable": "Dieses Spiel hat keine teilbaren Einstellungen.",
       "toast.challengeShared": "Herausforderung in den Chat geteilt!",
-      "toast.resultShared": "Ergebnis geteilt",
 
       "dlg.endTurn.title": "Zug beenden?",
       "dlg.endTurn.text":
         "Vielleicht hast du die Züge für ein Königreich vergessen.\n\nWillst du deinen Zug wirklich beenden?",
       "dlg.endTurn.yes": "Ja, Zug beenden",
       "dlg.endTurn.keep": "Weiterspielen",
-      "dlg.menu.title": "Menü",
       "dlg.menu.share": "Herausforderung in den Chat teilen",
       "dlg.menu.resign": "Aufgeben (zurück zum Menü)",
-      "dlg.menu.howto": "Spielanleitung",
       "dlg.menu.close": "Menü schließen",
       "dlg.resign.title": "Aufgeben?",
       "dlg.resign.text": "Dein Fortschritt geht verloren. Bist du sicher?",
       "dlg.resign.confirm": "Aufgeben",
-      "dlg.defeat.title": "NIEDERLAGE!",
       "dlg.defeat.text":
         "Alle deine Königreiche wurden in Runde {round} vom Gegner erobert.",
 
@@ -342,12 +316,8 @@ export const I18N = (() => {
         "Dein Gegner hat in Runde {round} die Mehrheit des Gebiets erobert.",
       "over.allConquered":
         "Alle deine Königreiche wurden in Runde {round} erobert.",
-      "over.shareResult": "Ergebnis in den Chat teilen",
-      "over.shareChallenge": "Herausforderung in den Chat teilen",
       "over.newGame": "Neues Spiel",
       "over.mainMenu": "Hauptmenü",
-
-      "list.title": "Herausforderungen",
       "list.intro":
         "In diesem Chat geteilte Karten. Spiele dieselbe Insel mit denselben Einstellungen. Dein bestes Ergebnis geht zurück in den Chat.",
       "list.empty":
@@ -396,7 +366,6 @@ export const I18N = (() => {
       "menu.newGame": "Nouvelle partie",
       "menu.daily": "Défi du jour",
       "menu.challenges": "Défis",
-      "menu.howto": "Comment jouer",
       "menu.settings": "Réglages",
       "menu.about": "À propos",
       "ui.back": "Retour",
@@ -404,8 +373,6 @@ export const I18N = (() => {
       "ui.cancel": "Annuler",
       "ui.play": "Jouer",
       "ui.expired": "Expiré",
-      "ui.menu": "Menu",
-      "ui.howto": "Comment jouer",
 
       "settings.showEnemyTurns": "Afficher les tours de l'ennemi",
       "settings.enemySpeed": "Vitesse des tours de l'ennemi",
@@ -423,7 +390,6 @@ export const I18N = (() => {
         "<b>Défis :</b> dans une messagerie, tu peux partager une carte dans la discussion et comparer tes résultats avec tous ceux qui la jouent.",
 
       "hud.menu": "Menu",
-      "hud.help": "Comment jouer",
       "hud.undo": "Annuler (Retour arrière)",
       "hud.buyPeasant": "Acheter un paysan (clic droit / 1)",
       "hud.buyTower": "Acheter une tour (clic du milieu / 2)",
@@ -442,8 +408,6 @@ export const I18N = (() => {
       "hud.selectKingdom": "Sélectionne un royaume.",
       "hud.allMovesDone":
         "Tous les coups sont joués — appuie sur ➜ pour terminer ton tour.",
-
-      "setup.title": "Nouvelle partie",
       "setup.color": "Ta couleur",
       "setup.difficulty": "Difficulté ennemie",
       "setup.mapsize": "Taille de la carte",
@@ -454,7 +418,6 @@ export const I18N = (() => {
       "setup.startChallenge": "Lancer le défi",
       "setup.randomSeed": "Générer une graine aléatoire",
       "setup.player": "Joueur {n}",
-      "setup.dailyTitle": "Défi du jour",
       "setup.dailyNote":
         "Défi du jour — une seule carte pour tout le monde aujourd'hui. Tu peux choisir la <strong>difficulté</strong> ; elle apparaîtra avec ton résultat. Appuie sur <strong>Lancer le défi</strong> pour jouer.",
       "setup.pastDailyNote":
@@ -475,8 +438,8 @@ export const I18N = (() => {
       "density.MEDIUM": "Modérée",
       "density.DENSE": "Compacte",
 
-      "mode.suffix": "en mode {mode}",
-      "mode.label": "mode {mode}",
+      "mode.label": "mode {modeLower}",
+      "mode.suffix": "en mode {modeLower}",
 
       "chat.sharedChallenge":
         "{name} a partagé un défi • difficulté {difficultyLower}, taille {sizeLower}, {players} joueurs, graine {seed}",
@@ -508,22 +471,18 @@ export const I18N = (() => {
       "toast.placeFirst": "Place d'abord ton objet sur la carte.",
       "toast.noShareable": "Cette partie n'a pas de réglages à partager.",
       "toast.challengeShared": "Défi partagé dans la discussion !",
-      "toast.resultShared": "Résultat partagé",
 
       "dlg.endTurn.title": "Terminer le tour ?",
       "dlg.endTurn.text":
         "Tu as peut-être oublié de jouer les coups d'un royaume.\n\nVeux-tu vraiment terminer ton tour ?",
       "dlg.endTurn.yes": "Oui, terminer le tour",
       "dlg.endTurn.keep": "Continuer à jouer",
-      "dlg.menu.title": "Menu",
       "dlg.menu.share": "Partager le défi dans la discussion",
       "dlg.menu.resign": "Abandonner (retour au menu)",
-      "dlg.menu.howto": "Comment jouer",
       "dlg.menu.close": "Fermer le menu",
       "dlg.resign.title": "Abandonner ?",
       "dlg.resign.text": "Ta progression sera perdue. Es-tu sûr ?",
       "dlg.resign.confirm": "Abandonner",
-      "dlg.defeat.title": "DÉFAITE !",
       "dlg.defeat.text":
         "Tous tes royaumes ont été conquis par l'ennemi à la manche {round}.",
 
@@ -536,12 +495,8 @@ export const I18N = (() => {
         "Ton ennemi a conquis la majorité du territoire à la manche {round}.",
       "over.allConquered":
         "Tous tes royaumes ont été conquis à la manche {round}.",
-      "over.shareResult": "Partager le résultat dans la discussion",
-      "over.shareChallenge": "Partager le défi dans la discussion",
       "over.newGame": "Nouvelle partie",
       "over.mainMenu": "Menu principal",
-
-      "list.title": "Défis",
       "list.intro":
         "Cartes partagées dans cette discussion. Joue exactement la même île et les mêmes réglages. Ton meilleur résultat sera renvoyé dans la discussion.",
       "list.empty":
@@ -590,7 +545,6 @@ export const I18N = (() => {
       "menu.newGame": "Nuova partita",
       "menu.daily": "Sfida del giorno",
       "menu.challenges": "Sfide",
-      "menu.howto": "Come giocare",
       "menu.settings": "Impostazioni",
       "menu.about": "Informazioni",
       "ui.back": "Indietro",
@@ -598,8 +552,6 @@ export const I18N = (() => {
       "ui.cancel": "Annulla",
       "ui.play": "Gioca",
       "ui.expired": "Scaduta",
-      "ui.menu": "Menu",
-      "ui.howto": "Come giocare",
 
       "settings.showEnemyTurns": "Mostra i turni del nemico",
       "settings.enemySpeed": "Velocità dei turni del nemico",
@@ -617,7 +569,6 @@ export const I18N = (() => {
         "<b>Sfide:</b> in un messenger puoi condividere una mappa nella chat e confrontare i risultati con tutti quelli che la giocano.",
 
       "hud.menu": "Menu",
-      "hud.help": "Come giocare",
       "hud.undo": "Annulla (Backspace)",
       "hud.buyPeasant": "Compra un contadino (clic destro / 1)",
       "hud.buyTower": "Compra una torre (clic centrale / 2)",
@@ -636,8 +587,6 @@ export const I18N = (() => {
       "hud.selectKingdom": "Scegli un regno.",
       "hud.allMovesDone":
         "Tutte le mosse fatte — premi ➜ per terminare il turno.",
-
-      "setup.title": "Nuova partita",
       "setup.color": "Il tuo colore",
       "setup.difficulty": "Difficoltà nemica",
       "setup.mapsize": "Dimensione mappa",
@@ -648,7 +597,6 @@ export const I18N = (() => {
       "setup.startChallenge": "Inizia la sfida",
       "setup.randomSeed": "Genera un seme casuale",
       "setup.player": "Giocatore {n}",
-      "setup.dailyTitle": "Sfida del giorno",
       "setup.dailyNote":
         "Sfida del giorno — una sola mappa per tutti oggi. Puoi scegliere la <strong>difficoltà</strong>; verrà mostrata con il tuo risultato. Premi <strong>Inizia la sfida</strong> per giocarla.",
       "setup.pastDailyNote":
@@ -669,8 +617,8 @@ export const I18N = (() => {
       "density.MEDIUM": "Moderata",
       "density.DENSE": "Compatta",
 
-      "mode.suffix": "in modalità {mode}",
-      "mode.label": "modalità {mode}",
+      "mode.label": "modalità {modeLower}",
+      "mode.suffix": "in modalità {modeLower}",
 
       "chat.sharedChallenge":
         "{name} ha condiviso una sfida • difficoltà {difficultyLower}, dimensione {sizeLower}, {players} giocatori, seme {seed}",
@@ -702,22 +650,18 @@ export const I18N = (() => {
       "toast.placeFirst": "Prima posiziona il tuo oggetto sulla mappa.",
       "toast.noShareable": "Questa partita non ha impostazioni da condividere.",
       "toast.challengeShared": "Sfida condivisa nella chat!",
-      "toast.resultShared": "Risultato condiviso",
 
       "dlg.endTurn.title": "Terminare il turno?",
       "dlg.endTurn.text":
         "Forse hai dimenticato di fare le mosse di un regno.\n\nVuoi davvero terminare il turno?",
       "dlg.endTurn.yes": "Sì, termina il turno",
       "dlg.endTurn.keep": "Continua a giocare",
-      "dlg.menu.title": "Menu",
       "dlg.menu.share": "Condividi la sfida nella chat",
       "dlg.menu.resign": "Abbandona (torna al menu)",
-      "dlg.menu.howto": "Come giocare",
       "dlg.menu.close": "Chiudi il menu",
       "dlg.resign.title": "Abbandonare?",
       "dlg.resign.text": "I tuoi progressi andranno persi. Sei sicuro?",
       "dlg.resign.confirm": "Abbandona",
-      "dlg.defeat.title": "SCONFITTA!",
       "dlg.defeat.text":
         "Tutti i tuoi regni sono stati conquistati dal nemico al round {round}.",
 
@@ -730,12 +674,8 @@ export const I18N = (() => {
         "Il tuo nemico ha conquistato la maggior parte del territorio al round {round}.",
       "over.allConquered":
         "Tutti i tuoi regni sono stati conquistati al round {round}.",
-      "over.shareResult": "Condividi il risultato nella chat",
-      "over.shareChallenge": "Condividi la sfida nella chat",
       "over.newGame": "Nuova partita",
       "over.mainMenu": "Menu principale",
-
-      "list.title": "Sfide",
       "list.intro":
         "Mappe condivise in questa chat. Gioca la stessa isola e le stesse impostazioni. Il tuo miglior risultato torna nella chat.",
       "list.empty":
@@ -784,7 +724,6 @@ export const I18N = (() => {
       "menu.newGame": "Nueva partida",
       "menu.daily": "Reto del día",
       "menu.challenges": "Retos",
-      "menu.howto": "Cómo jugar",
       "menu.settings": "Ajustes",
       "menu.about": "Acerca de",
       "ui.back": "Atrás",
@@ -792,8 +731,6 @@ export const I18N = (() => {
       "ui.cancel": "Cancelar",
       "ui.play": "Jugar",
       "ui.expired": "Caducado",
-      "ui.menu": "Menú",
-      "ui.howto": "Cómo jugar",
 
       "settings.showEnemyTurns": "Mostrar los turnos del enemigo",
       "settings.enemySpeed": "Velocidad de los turnos del enemigo",
@@ -811,7 +748,6 @@ export const I18N = (() => {
         "<b>Retos:</b> dentro de una mensajería puedes compartir un mapa en el chat y comparar resultados con todos los que lo jueguen.",
 
       "hud.menu": "Menú",
-      "hud.help": "Cómo jugar",
       "hud.undo": "Deshacer (Retroceso)",
       "hud.buyPeasant": "Comprar campesino (clic derecho / 1)",
       "hud.buyTower": "Comprar torre (clic central / 2)",
@@ -830,8 +766,6 @@ export const I18N = (() => {
       "hud.selectKingdom": "Selecciona un reino.",
       "hud.allMovesDone":
         "Todos los movimientos hechos — pulsa ➜ para terminar tu turno.",
-
-      "setup.title": "Nueva partida",
       "setup.color": "Tu color",
       "setup.difficulty": "Dificultad enemiga",
       "setup.mapsize": "Tamaño del mapa",
@@ -842,7 +776,6 @@ export const I18N = (() => {
       "setup.startChallenge": "Empezar reto",
       "setup.randomSeed": "Generar una semilla aleatoria",
       "setup.player": "Jugador {n}",
-      "setup.dailyTitle": "Reto del día",
       "setup.dailyNote":
         "Reto del día — un solo mapa para todos hoy. Puedes elegir la <strong>dificultad</strong>; se mostrará con tu resultado. Pulsa <strong>Empezar reto</strong> para jugarlo.",
       "setup.pastDailyNote":
@@ -863,8 +796,8 @@ export const I18N = (() => {
       "density.MEDIUM": "Moderada",
       "density.DENSE": "Compacta",
 
-      "mode.suffix": "en modo {mode}",
-      "mode.label": "modo {mode}",
+      "mode.label": "modo {modeLower}",
+      "mode.suffix": "en modo {modeLower}",
 
       "chat.sharedChallenge":
         "{name} ha compartido un reto • dificultad {difficultyLower}, tamaño {sizeLower}, {players} jugadores, semilla {seed}",
@@ -897,22 +830,18 @@ export const I18N = (() => {
       "toast.placeFirst": "Coloca primero tu objeto en el mapa.",
       "toast.noShareable": "Esta partida no tiene ajustes que compartir.",
       "toast.challengeShared": "¡Reto compartido en el chat!",
-      "toast.resultShared": "Resultado compartido",
 
       "dlg.endTurn.title": "¿Terminar el turno?",
       "dlg.endTurn.text":
         "Quizá hayas olvidado hacer los movimientos de un reino.\n\n¿Seguro que quieres terminar tu turno?",
       "dlg.endTurn.yes": "Sí, terminar turno",
       "dlg.endTurn.keep": "Seguir jugando",
-      "dlg.menu.title": "Menú",
       "dlg.menu.share": "Compartir reto en el chat",
       "dlg.menu.resign": "Abandonar (volver al menú)",
-      "dlg.menu.howto": "Cómo jugar",
       "dlg.menu.close": "Cerrar el menú",
       "dlg.resign.title": "¿Abandonar?",
       "dlg.resign.text": "Perderás tu progreso. ¿Seguro?",
       "dlg.resign.confirm": "Abandonar",
-      "dlg.defeat.title": "¡DERROTA!",
       "dlg.defeat.text":
         "El enemigo ha conquistado todos tus reinos en la ronda {round}.",
 
@@ -926,12 +855,8 @@ export const I18N = (() => {
         "Tu enemigo ha conquistado la mayor parte del territorio en la ronda {round}.",
       "over.allConquered":
         "Todos tus reinos han sido conquistados en la ronda {round}.",
-      "over.shareResult": "Compartir resultado en el chat",
-      "over.shareChallenge": "Compartir reto en el chat",
       "over.newGame": "Nueva partida",
       "over.mainMenu": "Menú principal",
-
-      "list.title": "Retos",
       "list.intro":
         "Mapas compartidos en este chat. Juega exactamente la misma isla y los mismos ajustes. Tu mejor resultado se envía de vuelta al chat.",
       "list.empty":
@@ -949,7 +874,7 @@ export const I18N = (() => {
       "board.lost": "perdido · ronda {round}",
       "board.gaveUp": "abandonado",
 
-      "howto.title": "Cómo jugar",
+      "howto.title": "¿Cómo jugar?",
       "howto.p1":
         "Cada casilla tiene un color que muestra a qué jugador pertenece. Dos o más casillas conectadas del mismo color forman un <b>reino</b>. Conquista toda la isla para ganar: la partida acaba cuando un jugador posee el 80 % de las casillas de los reinos.",
       "howto.p2":
@@ -980,7 +905,6 @@ export const I18N = (() => {
       "menu.newGame": "Novo jogo",
       "menu.daily": "Desafio do dia",
       "menu.challenges": "Desafios",
-      "menu.howto": "Como jogar",
       "menu.settings": "Definições",
       "menu.about": "Sobre",
       "ui.back": "Voltar",
@@ -988,8 +912,6 @@ export const I18N = (() => {
       "ui.cancel": "Cancelar",
       "ui.play": "Jogar",
       "ui.expired": "Expirado",
-      "ui.menu": "Menu",
-      "ui.howto": "Como jogar",
 
       "settings.showEnemyTurns": "Mostrar os turnos do inimigo",
       "settings.enemySpeed": "Velocidade dos turnos do inimigo",
@@ -1007,7 +929,6 @@ export const I18N = (() => {
         "<b>Desafios:</b> dentro de um mensageiro podes partilhar um mapa no chat e comparar resultados com todos os que o jogarem.",
 
       "hud.menu": "Menu",
-      "hud.help": "Como jogar",
       "hud.undo": "Desfazer (Retrocesso)",
       "hud.buyPeasant": "Comprar camponês (clique direito / 1)",
       "hud.buyTower": "Comprar torre (clique do meio / 2)",
@@ -1026,8 +947,6 @@ export const I18N = (() => {
       "hud.selectKingdom": "Seleciona um reino.",
       "hud.allMovesDone":
         "Todas as jogadas feitas — carrega em ➜ para terminar o teu turno.",
-
-      "setup.title": "Novo jogo",
       "setup.color": "A tua cor",
       "setup.difficulty": "Dificuldade inimiga",
       "setup.mapsize": "Tamanho do mapa",
@@ -1038,7 +957,6 @@ export const I18N = (() => {
       "setup.startChallenge": "Começar desafio",
       "setup.randomSeed": "Gerar uma semente aleatória",
       "setup.player": "Jogador {n}",
-      "setup.dailyTitle": "Desafio do dia",
       "setup.dailyNote":
         "Desafio do dia — um só mapa para todos hoje. Podes escolher a <strong>dificuldade</strong>; ela aparece com o teu resultado. Carrega em <strong>Começar desafio</strong> para o jogar.",
       "setup.pastDailyNote":
@@ -1059,8 +977,8 @@ export const I18N = (() => {
       "density.MEDIUM": "Moderada",
       "density.DENSE": "Compacta",
 
-      "mode.suffix": "em modo {mode}",
-      "mode.label": "modo {mode}",
+      "mode.label": "modo {modeLower}",
+      "mode.suffix": "em modo {modeLower}",
 
       "chat.sharedChallenge":
         "{name} partilhou um desafio • dificuldade {difficultyLower}, tamanho {sizeLower}, {players} jogadores, semente {seed}",
@@ -1092,22 +1010,18 @@ export const I18N = (() => {
       "toast.placeFirst": "Coloca primeiro o teu objeto no mapa.",
       "toast.noShareable": "Este jogo não tem definições para partilhar.",
       "toast.challengeShared": "Desafio partilhado no chat!",
-      "toast.resultShared": "Resultado partilhado",
 
       "dlg.endTurn.title": "Terminar o turno?",
       "dlg.endTurn.text":
         "Podes ter esquecido as jogadas de um reino.\n\nTens a certeza de que queres terminar o teu turno?",
       "dlg.endTurn.yes": "Sim, terminar turno",
       "dlg.endTurn.keep": "Continuar a jogar",
-      "dlg.menu.title": "Menu",
       "dlg.menu.share": "Partilhar desafio no chat",
       "dlg.menu.resign": "Desistir (voltar ao menu)",
-      "dlg.menu.howto": "Como jogar",
       "dlg.menu.close": "Fechar o menu",
       "dlg.resign.title": "Desistir?",
       "dlg.resign.text": "O teu progresso perde-se. Tens a certeza?",
       "dlg.resign.confirm": "Desistir",
-      "dlg.defeat.title": "DERROTA!",
       "dlg.defeat.text":
         "Todos os teus reinos foram conquistados pelo inimigo na ronda {round}.",
 
@@ -1120,12 +1034,8 @@ export const I18N = (() => {
         "O teu inimigo conquistou a maioria do território na ronda {round}.",
       "over.allConquered":
         "Todos os teus reinos foram conquistados na ronda {round}.",
-      "over.shareResult": "Partilhar resultado no chat",
-      "over.shareChallenge": "Partilhar desafio no chat",
       "over.newGame": "Novo jogo",
       "over.mainMenu": "Menu principal",
-
-      "list.title": "Desafios",
       "list.intro":
         "Mapas partilhados neste chat. Joga exatamente a mesma ilha e as mesmas definições. O teu melhor resultado volta para o chat.",
       "list.empty":
