@@ -14,7 +14,7 @@ and an unique daily challenge every day.
 | ------------------------------------------ | ---------------------------------------------------- | ---------------------- |
 | Select kingdom / pick up / place / conquer | tap a tile (tap a second time on a stack to combine) | —                      |
 | Buy peasant                                | person button, or right-click, or long-press         | `1`                    |
-| Buy castle                                 | castle button, or middle-click                       | `2`                    |
+| Buy tower                                  | tower button, or middle-click                        | `2`                    |
 | End turn                                   | arrow button                                         | `e`                    |
 | Undo                                       | arrow-left button                                    | `Ctrl+Z` / `Backspace` |
 | Pan / zoom                                 | drag / pinch or wheel                                | —                      |

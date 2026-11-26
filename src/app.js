@@ -1165,10 +1165,9 @@ const Flow = {
     }
   },
 
-  buyCastle() {
+  buyTower() {
     if (!Flow.canBuyFromSelection()) return;
-    if (!Flow.tryMove({ type: "BUY_CASTLE" }))
-      toast(t("toast.notEnoughCastle"));
+    if (!Flow.tryMove({ type: "BUY_TOWER" })) toast(t("toast.notEnoughTower"));
   },
 
   undo() {
@@ -1598,7 +1597,7 @@ const UI = {
       bottom.classList.add("enemy-turn");
       $("btn-endturn").disabled = true;
       $("btn-peasant").disabled = true;
-      $("btn-castle").disabled = true;
+      $("btn-tower").disabled = true;
       $("btn-undo").disabled = true;
       return;
     }
@@ -1618,7 +1617,7 @@ const UI = {
       bottom.classList.add("enemy-turn");
       $("btn-endturn").disabled = true;
       $("btn-peasant").disabled = true;
-      $("btn-castle").disabled = true;
+      $("btn-tower").disabled = true;
       $("btn-undo").disabled = true;
       return;
     }
@@ -1664,7 +1663,7 @@ const UI = {
       gs.activeKingdom != null ? gs.kingdomById.get(gs.activeKingdom) : null;
     const canBuy = active.type === "HUMAN" && myKingdom != null;
     $("btn-peasant").disabled = !(canBuy && myKingdom.savings >= 10);
-    $("btn-castle").disabled = !(canBuy && myKingdom.savings >= 15);
+    $("btn-tower").disabled = !(canBuy && myKingdom.savings >= 15);
     $("btn-undo").disabled =
       !(active.type === "HUMAN" && App.undoStack.length > 0) ||
       App.enemyRunning;
@@ -2020,7 +2019,7 @@ const Input = {
         Flow.buyPeasant();
       } else if (e.button === 1) {
         e.preventDefault();
-        Flow.buyCastle();
+        Flow.buyTower();
       }
     });
     window.addEventListener("keydown", (e) => {
@@ -2037,7 +2036,7 @@ const Input = {
       } else if (e.key === "1") {
         Flow.buyPeasant();
       } else if (e.key === "2") {
-        Flow.buyCastle();
+        Flow.buyTower();
       } else if (e.key === "e") {
         Flow.endTurnClick();
       }
@@ -2070,7 +2069,7 @@ const Input = {
         Input.longPressTimer = setTimeout(() => {
           if (Input.tapStart && !Input.tapStart.moved) {
             Input.longPressFired = true;
-            Flow.buyCastle();
+            Flow.buyTower();
           }
         }, 650);
       }
@@ -2289,7 +2288,7 @@ function wireMenu() {
   };
   $("btn-undo").onclick = () => Flow.undo();
   $("btn-peasant").onclick = () => Flow.buyPeasant();
-  $("btn-castle").onclick = () => Flow.buyCastle();
+  $("btn-tower").onclick = () => Flow.buyTower();
   $("btn-endturn").onclick = () => Flow.endTurnClick();
 }
 

@@ -251,8 +251,8 @@ const UNIT_BY_STRENGTH = {
   3: UNITS.KNIGHT,
   4: UNITS.BARON,
 };
-const CASTLE_COST = 15;
-const CASTLE_STRENGTH = 2;
+const TOWER_COST = 15;
+const TOWER_STRENGTH = 2;
 const CAPITAL_STRENGTH = 1;
 const DEAFULT_INITIAL_TREE_DENSITY = 0.1;
 const WIN_LANDMASS_PERCENTAGE = 0.8;
@@ -267,7 +267,7 @@ const INTELLIGENCE = {
     chanceToConquerPerTurn: 0.5,
     blockingObjectRemovalScoreTreshold: 0,
     reconsidersWhichTilesToProtect: false,
-    protectWithCastleScoreTreshold: 1e9,
+    protectWithTowerScoreTreshold: 1e9,
     protectWithUnitScoreTreshold: 1e9,
     attackOtherBotsBias: 5,
     smartDefending: false,
@@ -281,7 +281,7 @@ const INTELLIGENCE = {
     chanceToConquerPerTurn: 0.8,
     blockingObjectRemovalScoreTreshold: 0,
     reconsidersWhichTilesToProtect: false,
-    protectWithCastleScoreTreshold: 1e9,
+    protectWithTowerScoreTreshold: 1e9,
     protectWithUnitScoreTreshold: 1e9,
     attackOtherBotsBias: 5,
     smartDefending: false,
@@ -295,7 +295,7 @@ const INTELLIGENCE = {
     chanceToConquerPerTurn: 1,
     blockingObjectRemovalScoreTreshold: 4,
     reconsidersWhichTilesToProtect: false,
-    protectWithCastleScoreTreshold: 25,
+    protectWithTowerScoreTreshold: 25,
     protectWithUnitScoreTreshold: 20,
     attackOtherBotsBias: 0,
     smartDefending: true,
@@ -309,7 +309,7 @@ const INTELLIGENCE = {
     chanceToConquerPerTurn: 1,
     blockingObjectRemovalScoreTreshold: 7,
     reconsidersWhichTilesToProtect: true,
-    protectWithCastleScoreTreshold: 25,
+    protectWithTowerScoreTreshold: 25,
     protectWithUnitScoreTreshold: 20,
     attackOtherBotsBias: 0,
     smartDefending: true,
@@ -330,8 +330,8 @@ const Content = {
   unit(type) {
     return { k: "unit", t: type.type, canAct: true };
   },
-  castle() {
-    return { k: "castle" };
+  tower() {
+    return { k: "tower" };
   },
   capital() {
     return { k: "capital" };
@@ -353,8 +353,8 @@ const Content = {
     switch (c.k) {
       case "unit":
         return UNIT_BY_STRENGTH[unitStrength(c)].strength;
-      case "castle":
-        return CASTLE_STRENGTH;
+      case "tower":
+        return TOWER_STRENGTH;
       case "capital":
         return CAPITAL_STRENGTH;
       default:
@@ -988,10 +988,10 @@ const GameStateHelper = {
     }
   },
 
-  buyCastle(gs) {
+  buyTower(gs) {
     const k = gs.kingdomById.get(gs.activeKingdom);
-    k.savings -= CASTLE_COST;
-    gs.heldObject = Content.castle();
+    k.savings -= TOWER_COST;
+    gs.heldObject = Content.tower();
   },
 
   removeTileFromItsKingdom(gs, tile) {
@@ -1169,7 +1169,7 @@ const GameStateHelper = {
         const tile = gs.tiles[ti];
         if (tile.content != null) {
           if (tile.content.k === "capital") GameStateHelper.spawnTree(gs, tile);
-          else if (tile.content.k === "castle") tile.content = null;
+          else if (tile.content.k === "tower") tile.content = null;
         }
         GameStateHelper.removeTileFromKingdomStruct(gs, tile);
       }
@@ -1325,12 +1325,12 @@ const GameStateHelper = {
         sumOfTotalPossibleUnitStrength,
         4,
       );
-      const canAffordCastle = kingdom.savings >= CASTLE_COST;
+      const canAffordTower = kingdom.savings >= TOWER_COST;
       if (
         GameStateHelper.wasKingdomPotentiallyForgotten(
           gs,
           kingdom,
-          canAffordCastle,
+          canAffordTower,
           hasEmptyTile,
           hasRemovableTileContent,
           sumOfTotalPossibleUnitStrength,
@@ -1345,12 +1345,12 @@ const GameStateHelper = {
   wasKingdomPotentiallyForgotten(
     gs,
     kingdom,
-    canAffordCastle,
+    canAffordTower,
     hasEmptyTile,
     hasTree,
     sumStrength,
   ) {
-    if (canAffordCastle && hasEmptyTile) return true;
+    if (canAffordTower && hasEmptyTile) return true;
     if (sumStrength > 0) {
       if (hasTree) return true;
       for (const ti of kingdom.tiles) {
@@ -1448,15 +1448,15 @@ const GameStateHelper = {
       case "BUY_PEASANT":
         GameStateHelper.buyPeasant(gs);
         break;
-      case "BUY_CASTLE":
-        GameStateHelper.buyCastle(gs);
+      case "BUY_TOWER":
+        GameStateHelper.buyTower(gs);
         break;
       case "BUY_AND_PLACE_PEASANT":
         GameStateHelper.buyPeasant(gs);
         if (tile) GameStateHelper.placeOwn(gs, tile);
         break;
-      case "BUY_AND_PLACE_CASTLE":
-        GameStateHelper.buyCastle(gs);
+      case "BUY_AND_PLACE_TOWER":
+        GameStateHelper.buyTower(gs);
         if (tile) GameStateHelper.placeOwn(gs, tile);
         break;
       case "ACTIVATE_KINGDOM":
@@ -1531,13 +1531,13 @@ const InputValidationHelper = {
     return tile.content == null || Content.isBlocking(tile.content);
   },
 
-  checkBuyAndPlaceCastleInstantly(gs, playerIndex, tile) {
+  checkBuyAndPlaceTowerInstantly(gs, playerIndex, tile) {
     if (!InputValidationHelper.isCorrectPlayersTurn(gs, playerIndex))
       return false;
     const activeKingdom =
       gs.activeKingdom != null ? gs.kingdomById.get(gs.activeKingdom) : null;
     if (activeKingdom == null) return false;
-    if (activeKingdom.savings < CASTLE_COST) return false;
+    if (activeKingdom.savings < TOWER_COST) return false;
     if (gs.heldObject != null) return false;
     if (InputValidationHelper.isWater(tile)) return false;
     if (playerIndex !== tile.player) return false;
@@ -1602,7 +1602,7 @@ const InputValidationHelper = {
     const activeKingdom =
       gs.activeKingdom != null ? gs.kingdomById.get(gs.activeKingdom) : null;
     if (activeKingdom == null) return false;
-    const cost = targetKind === "unit" ? 10 : CASTLE_COST;
+    const cost = targetKind === "unit" ? 10 : TOWER_COST;
     if (activeKingdom.savings < cost) return false;
     return (
       gs.heldObject == null ||
@@ -1631,16 +1631,16 @@ const InputValidationHelper = {
         return InputValidationHelper.checkConquer(gs, playerIndex, tile);
       case "BUY_PEASANT":
         return InputValidationHelper.checkBuyObject(gs, playerIndex, "unit");
-      case "BUY_CASTLE":
-        return InputValidationHelper.checkBuyObject(gs, playerIndex, "castle");
+      case "BUY_TOWER":
+        return InputValidationHelper.checkBuyObject(gs, playerIndex, "tower");
       case "BUY_AND_PLACE_PEASANT":
         return InputValidationHelper.checkBuyAndPlaceUnitInstantly(
           gs,
           playerIndex,
           tile,
         );
-      case "BUY_AND_PLACE_CASTLE":
-        return InputValidationHelper.checkBuyAndPlaceCastleInstantly(
+      case "BUY_AND_PLACE_TOWER":
+        return InputValidationHelper.checkBuyAndPlaceTowerInstantly(
           gs,
           playerIndex,
           tile,
@@ -1677,8 +1677,8 @@ export {
   HexMapHelper,
   UNITS,
   UNIT_BY_STRENGTH,
-  CASTLE_COST,
-  CASTLE_STRENGTH,
+  TOWER_COST,
+  TOWER_STRENGTH,
   CAPITAL_STRENGTH,
   DEAFULT_INITIAL_TREE_DENSITY,
   WIN_LANDMASS_PERCENTAGE,

@@ -34,7 +34,7 @@ export const I18N = (() => {
       "hud.help": "How to play",
       "hud.undo": "Undo (Backspace)",
       "hud.buyPeasant": "Buy peasant (right click / 1)",
-      "hud.buyCastle": "Buy castle (middle click / 2)",
+      "hud.buyTower": "Buy tower (middle click / 2)",
       "hud.endTurn": "End turn",
       "hud.spectating": "Spectating",
       "hud.victory": "Victory",
@@ -110,7 +110,7 @@ export const I18N = (() => {
       "toast.colorNotOccupied":
         "Your color must be one of the occupied starting positions.",
       "toast.notEnoughPeasant": "Not enough money for a peasant.",
-      "toast.notEnoughCastle": "Not enough money for a castle.",
+      "toast.notEnoughTower": "Not enough money for a tower.",
       "toast.nothingToUndo": "Nothing to undo.",
       "toast.placeFirst": "Place your object on the map first.",
       "toast.noShareable": "This game has no shareable settings.",
@@ -171,7 +171,7 @@ export const I18N = (() => {
       "howto.p2":
         "<b>Select a kingdom</b> by tapping one of your tiles (white outline). Its finances are shown in the top left: <i>Savings (+income)</i>. Each kingdom earns one coin per tile that has no tree on it. Units cost salary every turn.",
       "howto.p3":
-        "<b>Units &amp; castles:</b> buy a peasant for 10 coins, place it on one of your own tiles or on an enemy tile adjacent to your kingdom. Place a peasant on another unit to combine them into a stronger unit. Only knights and barons can destroy castles.",
+        "<b>Units &amp; towers:</b> buy a peasant for 10 coins, place it on one of your own tiles or on an enemy tile adjacent to your kingdom. Place a peasant on another unit to combine them into a stronger unit. Only knights and barons can destroy towers.",
       "howto.unit": "Unit",
       "howto.strength": "Strength",
       "howto.salary": "Salary",
@@ -180,13 +180,13 @@ export const I18N = (() => {
       "unit.KNIGHT": "Knight",
       "unit.BARON": "Baron",
       "howto.p5":
-        "<b>Protection:</b> units, capitals and castles protect their tile and all adjacent tiles; up to four shield icons show the protection level. You need a <i>stronger</i> unit than the protection to conquer.",
+        "<b>Protection:</b> units, capitals and towers protect their tile and all adjacent tiles; a digit and a shield in the corner of a tile show its protection level. You need a <i>stronger</i> unit than the protection to conquer.",
       "howto.p6":
         "<b>Capitals:</b> if a capital is destroyed (or a tile is cut off), the kingdom's savings are lost and a new capital is placed. If a kingdom is split, only the part with the capital keeps the money.",
       "howto.p7":
         "<b>Trees</b> block income. Palm trees grow on coast and spread every round; oak trees spread when two are adjacent. Place a unit on a tree to chop it (the unit cannot act afterwards). <b>Gravestones</b> appear when units can't be paid and turn into trees.",
       "howto.p8":
-        "<b>Controls:</b> tap a tile to select a kingdom, tap a unit to pick it up and tap a target to place/conquer/combine. Double-tap an empty tile of the selected kingdom to buy and place a peasant at once. Buy buttons are at the bottom (right-click = peasant, middle-click = castle, long press also buys a castle). Undo works within your turn and the game is saved automatically.",
+        "<b>Controls:</b> tap a tile to select a kingdom, tap a unit to pick it up and tap a target to place/conquer/combine. Double-tap an empty tile of the selected kingdom to buy and place a peasant at once. Buy buttons are at the bottom (right-click = peasant, middle-click = tower, long press also buys a tower). Undo works within your turn and the game is saved automatically.",
       "howto.p9":
         "<b>Challenges:</b> in a messenger you can share the current map to the chat. Everyone who plays it gets the same island and posts their result, so you can compare who won in the fewest rounds.",
     },
@@ -226,7 +226,7 @@ export const I18N = (() => {
       "hud.help": "Spielanleitung",
       "hud.undo": "Rückgängig (Backspace)",
       "hud.buyPeasant": "Bauern kaufen (Rechtsklick / 1)",
-      "hud.buyCastle": "Burg kaufen (Mittelklick / 2)",
+      "hud.buyTower": "Turm kaufen (Mittelklick / 2)",
       "hud.endTurn": "Zug beenden",
       "hud.spectating": "Zuschauen",
       "hud.victory": "Sieg",
@@ -309,7 +309,7 @@ export const I18N = (() => {
       "toast.colorNotOccupied":
         "Deine Farbe muss eine der besetzten Startpositionen sein.",
       "toast.notEnoughPeasant": "Nicht genug Geld für einen Bauern.",
-      "toast.notEnoughCastle": "Nicht genug Geld für eine Burg.",
+      "toast.notEnoughTower": "Nicht genug Geld für einen Turm.",
       "toast.nothingToUndo": "Nichts rückgängig zu machen.",
       "toast.placeFirst": "Platziere zuerst dein Objekt auf der Karte.",
       "toast.noShareable": "Dieses Spiel hat keine teilbaren Einstellungen.",
@@ -371,7 +371,7 @@ export const I18N = (() => {
       "howto.p2":
         "<b>Wähle ein Königreich</b>, indem du auf eines deiner Felder tippst (weiße Umrandung). Seine Finanzen stehen oben links: <i>Ersparnisse (+Einkommen)</i>. Jedes Königreich verdient eine Münze pro Feld ohne Baum. Einheiten kosten jede Runde Sold.",
       "howto.p3":
-        "<b>Einheiten &amp; Burgen:</b> Kaufe einen Bauern für 10 Münzen und setze ihn auf ein eigenes Feld oder auf ein gegnerisches Feld neben deinem Königreich. Setze einen Bauern auf eine andere Einheit, um sie zu einer stärkeren Einheit zu vereinen. Nur Ritter und Barone können Burgen zerstören.",
+        "<b>Einheiten &amp; Türme:</b> Kaufe einen Bauern für 10 Münzen und setze ihn auf ein eigenes Feld oder auf ein gegnerisches Feld neben deinem Königreich. Setze einen Bauern auf eine andere Einheit, um sie zu einer stärkeren Einheit zu vereinen. Nur Ritter und Barone können Türme zerstören.",
       "howto.unit": "Einheit",
       "howto.strength": "Stärke",
       "howto.salary": "Sold",
@@ -380,13 +380,13 @@ export const I18N = (() => {
       "unit.KNIGHT": "Ritter",
       "unit.BARON": "Baron",
       "howto.p5":
-        "<b>Schutz:</b> Einheiten, Hauptstädte und Burgen schützen ihr Feld und alle angrenzenden Felder; bis zu vier Schildsymbole zeigen die Schutzstufe. Zum Erobern brauchst du eine <i>stärkere</i> Einheit als den Schutz.",
+        "<b>Schutz:</b> Einheiten, Hauptstädte und Türme schützen ihr Feld und alle angrenzenden Felder; eine Ziffer mit Schild in der Ecke eines Feldes zeigt seine Schutzstufe. Zum Erobern brauchst du eine <i>stärkere</i> Einheit als den Schutz.",
       "howto.p6":
         "<b>Hauptstädte:</b> Wird eine Hauptstadt zerstört (oder ein Feld abgeschnitten), sind die Ersparnisse des Königreichs verloren und eine neue Hauptstadt wird gesetzt. Wird ein Königreich geteilt, behält nur der Teil mit der Hauptstadt das Geld.",
       "howto.p7":
         "<b>Bäume</b> blockieren das Einkommen. Palmen wachsen an der Küste und breiten sich jede Runde aus; Eichen breiten sich aus, wenn zwei nebeneinander stehen. Setze eine Einheit auf einen Baum, um ihn zu fällen (die Einheit kann danach nicht mehr handeln). <b>Grabsteine</b> erscheinen, wenn Einheiten nicht bezahlt werden können, und werden zu Bäumen.",
       "howto.p8":
-        "<b>Steuerung:</b> Tippe ein Feld an, um ein Königreich zu wählen, tippe eine Einheit an, um sie aufzunehmen, und tippe ein Ziel an, um sie zu setzen, zu erobern oder zu vereinen. Doppeltippe auf ein leeres Feld des gewählten Königreichs, um einen Bauern zu kaufen und sofort zu setzen. Die Kauftasten sind unten (Rechtsklick = Bauer, Mittelklick = Burg, langes Drücken kauft ebenfalls eine Burg). Rückgängig gilt innerhalb deines Zuges, und das Spiel wird automatisch gesichert.",
+        "<b>Steuerung:</b> Tippe ein Feld an, um ein Königreich zu wählen, tippe eine Einheit an, um sie aufzunehmen, und tippe ein Ziel an, um sie zu setzen, zu erobern oder zu vereinen. Doppeltippe auf ein leeres Feld des gewählten Königreichs, um einen Bauern zu kaufen und sofort zu setzen. Die Kauftasten sind unten (Rechtsklick = Bauer, Mittelklick = Turm, langes Drücken kauft ebenfalls einen Turm). Rückgängig gilt innerhalb deines Zuges, und das Spiel wird automatisch gesichert.",
       "howto.p9":
         "<b>Herausforderungen:</b> In einem Messenger kannst du die aktuelle Karte in den Chat teilen. Alle, die sie spielen, bekommen dieselbe Insel und posten ihr Ergebnis, sodass du vergleichen kannst, wer in den wenigsten Runden gewonnen hat.",
     },
@@ -426,7 +426,7 @@ export const I18N = (() => {
       "hud.help": "Comment jouer",
       "hud.undo": "Annuler (Retour arrière)",
       "hud.buyPeasant": "Acheter un paysan (clic droit / 1)",
-      "hud.buyCastle": "Acheter un château (clic du milieu / 2)",
+      "hud.buyTower": "Acheter une tour (clic du milieu / 2)",
       "hud.endTurn": "Terminer le tour",
       "hud.spectating": "En spectateur",
       "hud.victory": "Victoire",
@@ -503,7 +503,7 @@ export const I18N = (() => {
       "toast.colorNotOccupied":
         "Ta couleur doit être l'une des positions de départ occupées.",
       "toast.notEnoughPeasant": "Pas assez d'argent pour un paysan.",
-      "toast.notEnoughCastle": "Pas assez d'argent pour un château.",
+      "toast.notEnoughTower": "Pas assez d'argent pour une tour.",
       "toast.nothingToUndo": "Rien à annuler.",
       "toast.placeFirst": "Place d'abord ton objet sur la carte.",
       "toast.noShareable": "Cette partie n'a pas de réglages à partager.",
@@ -565,7 +565,7 @@ export const I18N = (() => {
       "howto.p2":
         "<b>Sélectionne un royaume</b> en touchant une de tes cases (contour blanc). Ses finances s'affichent en haut à gauche : <i>Économies (+revenu)</i>. Chaque royaume gagne une pièce par case sans arbre. Les unités coûtent une solde à chaque tour.",
       "howto.p3":
-        "<b>Unités et châteaux :</b> achète un paysan pour 10 pièces, place-le sur une de tes cases ou sur une case ennemie voisine de ton royaume. Place un paysan sur une autre unité pour les fusionner en une unité plus forte. Seuls les chevaliers et les barons peuvent détruire les châteaux.",
+        "<b>Unités et tours :</b> achète un paysan pour 10 pièces, place-le sur une de tes cases ou sur une case ennemie voisine de ton royaume. Place un paysan sur une autre unité pour les fusionner en une unité plus forte. Seuls les chevaliers et les barons peuvent détruire les tours.",
       "howto.unit": "Unité",
       "howto.strength": "Force",
       "howto.salary": "Solde",
@@ -574,13 +574,13 @@ export const I18N = (() => {
       "unit.KNIGHT": "Chevalier",
       "unit.BARON": "Baron",
       "howto.p5":
-        "<b>Protection :</b> les unités, les capitales et les châteaux protègent leur case et toutes les cases voisines ; jusqu'à quatre icônes de bouclier indiquent le niveau de protection. Il te faut une unité <i>plus forte</i> que la protection pour conquérir.",
+        "<b>Protection :</b> les unités, les capitales et les tours protègent leur case et toutes les cases voisines ; un chiffre suivi d'un bouclier dans le coin d'une case indique son niveau de protection. Il te faut une unité <i>plus forte</i> que la protection pour conquérir.",
       "howto.p6":
         "<b>Capitales :</b> si une capitale est détruite (ou qu'une case est isolée), les économies du royaume sont perdues et une nouvelle capitale est placée. Si un royaume est coupé en deux, seule la partie avec la capitale garde l'argent.",
       "howto.p7":
         "<b>Les arbres</b> bloquent le revenu. Les palmiers poussent sur la côte et se répandent à chaque manche ; les chênes se répandent quand deux sont voisins. Place une unité sur un arbre pour l'abattre (l'unité ne peut plus agir ensuite). Les <b>pierres tombales</b> apparaissent quand des unités ne peuvent pas être payées et deviennent des arbres.",
       "howto.p8":
-        "<b>Commandes :</b> touche une case pour sélectionner un royaume, touche une unité pour la prendre et touche une cible pour la placer, conquérir ou fusionner. Touche deux fois une case vide du royaume sélectionné pour acheter et placer un paysan d'un coup. Les boutons d'achat sont en bas (clic droit = paysan, clic du milieu = château, un appui long achète aussi un château). L'annulation fonctionne pendant ton tour et la partie est enregistrée automatiquement.",
+        "<b>Commandes :</b> touche une case pour sélectionner un royaume, touche une unité pour la prendre et touche une cible pour la placer, conquérir ou fusionner. Touche deux fois une case vide du royaume sélectionné pour acheter et placer un paysan d'un coup. Les boutons d'achat sont en bas (clic droit = paysan, clic du milieu = tour, un appui long achète aussi une tour). L'annulation fonctionne pendant ton tour et la partie est enregistrée automatiquement.",
       "howto.p9":
         "<b>Défis :</b> dans une messagerie, tu peux partager la carte actuelle dans la discussion. Tous ceux qui la jouent obtiennent la même île et publient leur résultat, pour comparer qui a gagné en le moins de manches.",
     },
@@ -620,7 +620,7 @@ export const I18N = (() => {
       "hud.help": "Come giocare",
       "hud.undo": "Annulla (Backspace)",
       "hud.buyPeasant": "Compra un contadino (clic destro / 1)",
-      "hud.buyCastle": "Compra un castello (clic centrale / 2)",
+      "hud.buyTower": "Compra una torre (clic centrale / 2)",
       "hud.endTurn": "Termina il turno",
       "hud.spectating": "Spettatore",
       "hud.victory": "Vittoria",
@@ -697,7 +697,7 @@ export const I18N = (() => {
       "toast.colorNotOccupied":
         "Il tuo colore deve essere una delle posizioni di partenza occupate.",
       "toast.notEnoughPeasant": "Soldi insufficienti per un contadino.",
-      "toast.notEnoughCastle": "Soldi insufficienti per un castello.",
+      "toast.notEnoughTower": "Soldi insufficienti per una torre.",
       "toast.nothingToUndo": "Niente da annullare.",
       "toast.placeFirst": "Prima posiziona il tuo oggetto sulla mappa.",
       "toast.noShareable": "Questa partita non ha impostazioni da condividere.",
@@ -759,7 +759,7 @@ export const I18N = (() => {
       "howto.p2":
         "<b>Scegli un regno</b> toccando una delle tue caselle (bordo bianco). Le sue finanze sono in alto a sinistra: <i>Risparmi (+entrate)</i>. Ogni regno guadagna una moneta per ogni casella senza albero. Le unità costano uno stipendio ogni turno.",
       "howto.p3":
-        "<b>Unità e castelli:</b> compra un contadino per 10 monete, posizionalo su una tua casella o su una casella nemica adiacente al tuo regno. Posiziona un contadino su un'altra unità per unirle in un'unità più forte. Solo cavalieri e baroni possono distruggere i castelli.",
+        "<b>Unità e torri:</b> compra un contadino per 10 monete, posizionalo su una tua casella o su una casella nemica adiacente al tuo regno. Posiziona un contadino su un'altra unità per unirle in un'unità più forte. Solo cavalieri e baroni possono distruggere le torri.",
       "howto.unit": "Unità",
       "howto.strength": "Forza",
       "howto.salary": "Stipendio",
@@ -768,13 +768,13 @@ export const I18N = (() => {
       "unit.KNIGHT": "Cavaliere",
       "unit.BARON": "Barone",
       "howto.p5":
-        "<b>Protezione:</b> unità, capitali e castelli proteggono la loro casella e tutte quelle adiacenti; fino a quattro icone di scudo mostrano il livello di protezione. Per conquistare serve un'unità <i>più forte</i> della protezione.",
+        "<b>Protezione:</b> unità, capitali e torri proteggono la loro casella e tutte quelle adiacenti; una cifra seguita da uno scudo nell'angolo della casella mostra il livello di protezione. Per conquistare serve un'unità <i>più forte</i> della protezione.",
       "howto.p6":
         "<b>Capitali:</b> se una capitale viene distrutta (o una casella viene isolata), i risparmi del regno vanno persi e viene collocata una nuova capitale. Se un regno viene diviso, solo la parte con la capitale mantiene il denaro.",
       "howto.p7":
         "<b>Gli alberi</b> bloccano le entrate. Le palme crescono sulla costa e si diffondono ogni round; le querce si diffondono quando due sono adiacenti. Posiziona un'unità su un albero per abbatterlo (l'unità poi non può più agire). Le <b>lapidi</b> compaiono quando le unità non possono essere pagate e diventano alberi.",
       "howto.p8":
-        "<b>Comandi:</b> tocca una casella per scegliere un regno, tocca un'unità per prenderla e tocca un bersaglio per posizionarla, conquistare o unire. Tocca due volte una casella vuota del regno scelto per comprare e posizionare subito un contadino. I pulsanti di acquisto sono in basso (clic destro = contadino, clic centrale = castello, anche la pressione prolungata compra un castello). L'annullamento vale nel tuo turno e la partita viene salvata automaticamente.",
+        "<b>Comandi:</b> tocca una casella per scegliere un regno, tocca un'unità per prenderla e tocca un bersaglio per posizionarla, conquistare o unire. Tocca due volte una casella vuota del regno scelto per comprare e posizionare subito un contadino. I pulsanti di acquisto sono in basso (clic destro = contadino, clic centrale = torre, anche la pressione prolungata compra una torre). L'annullamento vale nel tuo turno e la partita viene salvata automaticamente.",
       "howto.p9":
         "<b>Sfide:</b> in un messenger puoi condividere la mappa attuale nella chat. Tutti quelli che la giocano ricevono la stessa isola e pubblicano il loro risultato, così puoi confrontare chi ha vinto in meno round.",
     },
@@ -814,7 +814,7 @@ export const I18N = (() => {
       "hud.help": "Cómo jugar",
       "hud.undo": "Deshacer (Retroceso)",
       "hud.buyPeasant": "Comprar campesino (clic derecho / 1)",
-      "hud.buyCastle": "Comprar castillo (clic central / 2)",
+      "hud.buyTower": "Comprar torre (clic central / 2)",
       "hud.endTurn": "Terminar turno",
       "hud.spectating": "Observando",
       "hud.victory": "Victoria",
@@ -892,7 +892,7 @@ export const I18N = (() => {
       "toast.colorNotOccupied":
         "Tu color debe ser una de las posiciones iniciales ocupadas.",
       "toast.notEnoughPeasant": "No hay dinero suficiente para un campesino.",
-      "toast.notEnoughCastle": "No hay dinero suficiente para un castillo.",
+      "toast.notEnoughTower": "No hay dinero suficiente para una torre.",
       "toast.nothingToUndo": "Nada que deshacer.",
       "toast.placeFirst": "Coloca primero tu objeto en el mapa.",
       "toast.noShareable": "Esta partida no tiene ajustes que compartir.",
@@ -955,7 +955,7 @@ export const I18N = (() => {
       "howto.p2":
         "<b>Selecciona un reino</b> tocando una de tus casillas (borde blanco). Sus finanzas aparecen arriba a la izquierda: <i>Ahorros (+ingresos)</i>. Cada reino gana una moneda por cada casilla sin árbol. Las unidades cuestan un salario cada turno.",
       "howto.p3":
-        "<b>Unidades y castillos:</b> compra un campesino por 10 monedas y colócalo en una de tus casillas o en una casilla enemiga junto a tu reino. Coloca un campesino sobre otra unidad para unirlas en una unidad más fuerte. Solo los caballeros y los barones pueden destruir castillos.",
+        "<b>Unidades y torres:</b> compra un campesino por 10 monedas y colócalo en una de tus casillas o en una casilla enemiga junto a tu reino. Coloca un campesino sobre otra unidad para unirlas en una unidad más fuerte. Solo los caballeros y los barones pueden destruir torres.",
       "howto.unit": "Unidad",
       "howto.strength": "Fuerza",
       "howto.salary": "Salario",
@@ -964,13 +964,13 @@ export const I18N = (() => {
       "unit.KNIGHT": "Caballero",
       "unit.BARON": "Barón",
       "howto.p5":
-        "<b>Protección:</b> las unidades, las capitales y los castillos protegen su casilla y todas las adyacentes; hasta cuatro iconos de escudo muestran el nivel de protección. Necesitas una unidad <i>más fuerte</i> que la protección para conquistar.",
+        "<b>Protección:</b> las unidades, las capitales y las torres protegen su casilla y todas las adyacentes; una cifra seguida de un escudo en la esquina de una casilla muestra su nivel de protección. Necesitas una unidad <i>más fuerte</i> que la protección para conquistar.",
       "howto.p6":
         "<b>Capitales:</b> si se destruye una capital (o se aísla una casilla), los ahorros del reino se pierden y se coloca una nueva capital. Si un reino se divide, solo la parte con la capital conserva el dinero.",
       "howto.p7":
         "<b>Los árboles</b> bloquean los ingresos. Las palmeras crecen en la costa y se extienden cada ronda; los robles se extienden cuando dos están juntos. Coloca una unidad sobre un árbol para talarlo (la unidad ya no podrá actuar). Las <b>lápidas</b> aparecen cuando no se pueden pagar unidades y se convierten en árboles.",
       "howto.p8":
-        "<b>Controles:</b> toca una casilla para seleccionar un reino, toca una unidad para cogerla y toca un objetivo para colocarla, conquistar o combinar. Toca dos veces una casilla vacía del reino seleccionado para comprar y colocar un campesino de una vez. Los botones de compra están abajo (clic derecho = campesino, clic central = castillo, una pulsación larga también compra un castillo). Deshacer funciona durante tu turno y la partida se guarda automáticamente.",
+        "<b>Controles:</b> toca una casilla para seleccionar un reino, toca una unidad para cogerla y toca un objetivo para colocarla, conquistar o combinar. Toca dos veces una casilla vacía del reino seleccionado para comprar y colocar un campesino de una vez. Los botones de compra están abajo (clic derecho = campesino, clic central = torre, una pulsación larga también compra una torre). Deshacer funciona durante tu turno y la partida se guarda automáticamente.",
       "howto.p9":
         "<b>Retos:</b> en una mensajería puedes compartir el mapa actual en el chat. Todos los que lo jueguen reciben la misma isla y publican su resultado, así puedes comparar quién ganó en menos rondas.",
     },
@@ -1010,7 +1010,7 @@ export const I18N = (() => {
       "hud.help": "Como jogar",
       "hud.undo": "Desfazer (Retrocesso)",
       "hud.buyPeasant": "Comprar camponês (clique direito / 1)",
-      "hud.buyCastle": "Comprar castelo (clique do meio / 2)",
+      "hud.buyTower": "Comprar torre (clique do meio / 2)",
       "hud.endTurn": "Terminar turno",
       "hud.spectating": "A assistir",
       "hud.victory": "Vitória",
@@ -1087,7 +1087,7 @@ export const I18N = (() => {
       "toast.colorNotOccupied":
         "A tua cor tem de ser uma das posições iniciais ocupadas.",
       "toast.notEnoughPeasant": "Dinheiro insuficiente para um camponês.",
-      "toast.notEnoughCastle": "Dinheiro insuficiente para um castelo.",
+      "toast.notEnoughTower": "Dinheiro insuficiente para uma torre.",
       "toast.nothingToUndo": "Nada para desfazer.",
       "toast.placeFirst": "Coloca primeiro o teu objeto no mapa.",
       "toast.noShareable": "Este jogo não tem definições para partilhar.",
@@ -1149,7 +1149,7 @@ export const I18N = (() => {
       "howto.p2":
         "<b>Seleciona um reino</b> tocando numa das tuas casinhas (contorno branco). As finanças aparecem no canto superior esquerdo: <i>Poupanças (+rendimento)</i>. Cada reino ganha uma moeda por cada casinha sem árvore. As unidades custam um salário em cada turno.",
       "howto.p3":
-        "<b>Unidades e castelos:</b> compra um camponês por 10 moedas e coloca-o numa das tuas casinhas ou numa casinha inimiga ao lado do teu reino. Coloca um camponês sobre outra unidade para as unir numa unidade mais forte. Só cavaleiros e barões podem destruir castelos.",
+        "<b>Unidades e torres:</b> compra um camponês por 10 moedas e coloca-o numa das tuas casinhas ou numa casinha inimiga ao lado do teu reino. Coloca um camponês sobre outra unidade para as unir numa unidade mais forte. Só cavaleiros e barões podem destruir torres.",
       "howto.unit": "Unidade",
       "howto.strength": "Força",
       "howto.salary": "Salário",
@@ -1158,13 +1158,13 @@ export const I18N = (() => {
       "unit.KNIGHT": "Cavaleiro",
       "unit.BARON": "Barão",
       "howto.p5":
-        "<b>Proteção:</b> as unidades, as capitais e os castelos protegem a sua casinha e todas as vizinhas; até quatro ícones de escudo mostram o nível de proteção. Precisas de uma unidade <i>mais forte</i> do que a proteção para conquistar.",
+        "<b>Proteção:</b> as unidades, as capitais e as torres protegem a sua casinha e todas as vizinhas; um número seguido de um escudo no canto de uma casinha mostra o seu nível de proteção. Precisas de uma unidade <i>mais forte</i> do que a proteção para conquistar.",
       "howto.p6":
         "<b>Capitais:</b> se uma capital for destruída (ou uma casinha ficar isolada), as poupanças do reino perdem-se e é colocada uma nova capital. Se um reino for dividido, só a parte com a capital fica com o dinheiro.",
       "howto.p7":
         "<b>As árvores</b> bloqueiam o rendimento. As palmeiras crescem na costa e espalham-se em cada ronda; os carvalhos espalham-se quando estão dois juntos. Coloca uma unidade sobre uma árvore para a cortar (a unidade já não pode agir). As <b>lápides</b> aparecem quando as unidades não podem ser pagas e transformam-se em árvores.",
       "howto.p8":
-        "<b>Controlos:</b> toca numa casinha para selecionar um reino, toca numa unidade para a pegar e toca num alvo para a colocar, conquistar ou combinar. Toca duas vezes numa casinha vazia do reino selecionado para comprar e colocar um camponês de uma vez. Os botões de compra estão em baixo (clique direito = camponês, clique do meio = castelo, um toque longo também compra um castelo). O desfazer funciona dentro do teu turno e o jogo é guardado automaticamente.",
+        "<b>Controlos:</b> toca numa casinha para selecionar um reino, toca numa unidade para a pegar e toca num alvo para a colocar, conquistar ou combinar. Toca duas vezes numa casinha vazia do reino selecionado para comprar e colocar um camponês de uma vez. Os botões de compra estão em baixo (clique direito = camponês, clique do meio = torre, um toque longo também compra uma torre). O desfazer funciona dentro do teu turno e o jogo é guardado automaticamente.",
       "howto.p9":
         "<b>Desafios:</b> num mensageiro podes partilhar o mapa atual no chat. Todos os que o jogarem recebem a mesma ilha e publicam o seu resultado, para poderes comparar quem ganhou em menos rondas.",
     },

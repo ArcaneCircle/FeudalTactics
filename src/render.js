@@ -48,7 +48,7 @@ const SPRITES = {
   knight: { sheet: "64x55", index: 4, frames: 2 },
   baron: { sheet: "64x55", index: 6, frames: 2 },
   capital: { sheet: "64x55", index: 8, frames: 1 },
-  castle: { sheet: "64x55", index: 9, frames: 1 },
+  tower: { sheet: "64x55", index: 9, frames: 1 },
   gravestone: { sheet: "64x55", index: 10, frames: 1 },
   tree: { sheet: "64x55", index: 11, frames: 1 },
   palm_tree: { sheet: "64x55", index: 12, frames: 1 },
@@ -62,7 +62,7 @@ const SPRITES = {
   digit3: { sheet: "16x16", index: 3, frames: 1 },
   digit4: { sheet: "16x16", index: 4, frames: 1 },
   peasant_icon: { sheet: "64x55", index: 0, frames: 1 },
-  castle_icon: { sheet: "64x55", index: 9, frames: 1 },
+  tower_icon: { sheet: "64x55", index: 9, frames: 1 },
   endturn_icon: { sheet: "64x64", index: 5, frames: 1 },
 };
 
@@ -107,8 +107,8 @@ const TextureAtlasHelper = {
         return "tree";
       case "palm":
         return "palm_tree";
-      case "castle":
-        return "castle";
+      case "tower":
+        return "tower";
       case "gravestone":
         return "gravestone";
       default:

@@ -8,7 +8,7 @@ import {
   HexMapHelper,
   UNITS,
   UNIT_BY_STRENGTH,
-  CASTLE_COST,
+  TOWER_COST,
   Content,
   unitStrength,
   GameStateHelper,
@@ -70,7 +70,7 @@ const BotAi = {
           ? 0
           : {
               unit: 10,
-              castle: 20,
+              tower: 20,
               capital: 30,
               tree: 40,
               palm: 50,
@@ -101,7 +101,7 @@ const BotAi = {
     gs.activeKingdom = kingdom.id;
     const pickedUpUnits = new PickedUpUnits();
     BotAi.pickUpAllAvailableUnits(gs, kingdom, pickedUpUnits);
-    const placedCastleTiles = new Set();
+    const placedTowerTiles = new Set();
 
     BotAi.removeBlockingObjects(
       gs,
@@ -112,16 +112,16 @@ const BotAi = {
       gs,
       intelligence,
       pickedUpUnits,
-      placedCastleTiles,
+      placedTowerTiles,
     );
     if (random.nextFloat() <= intelligence.chanceToConquerPerTurn) {
       BotAi.conquerAsMuchAsPossible(gs, intelligence, pickedUpUnits);
     }
     if (intelligence.reconsidersWhichTilesToProtect) {
-      BotAi.sellCastles(
+      BotAi.sellTowers(
         gs,
         gs.kingdomById.get(gs.activeKingdom),
-        placedCastleTiles,
+        placedTowerTiles,
       );
       BotAi.pickUpAllAvailableUnits(
         gs,
@@ -132,7 +132,7 @@ const BotAi = {
         gs,
         intelligence,
         pickedUpUnits,
-        placedCastleTiles,
+        placedTowerTiles,
       );
       BotAi.conquerAsMuchAsPossible(gs, intelligence, pickedUpUnits);
     }
@@ -187,24 +187,24 @@ const BotAi = {
     }
   },
 
-  defendMostImportantTiles(gs, intelligence, pickedUpUnits, placedCastleTiles) {
+  defendMostImportantTiles(gs, intelligence, pickedUpUnits, placedTowerTiles) {
     const interestingProtectionTiles = BotAi.getInterestingProtectionTiles(gs);
     let best = BotAi.getBestDefenseTileScore(
       gs,
       intelligence,
       interestingProtectionTiles,
     );
-    while (best.score >= intelligence.protectWithCastleScoreTreshold) {
+    while (best.score >= intelligence.protectWithTowerScoreTreshold) {
       if (
         InputValidationHelper.checkBuyObject(
           gs,
           gs.players[gs.playerTurn].index,
-          "castle",
+          "tower",
         )
       ) {
-        GameStateHelper.buyCastle(gs);
+        GameStateHelper.buyTower(gs);
         GameStateHelper.placeOwn(gs, best.tile);
-        placedCastleTiles.add(best.tile.idx);
+        placedTowerTiles.add(best.tile.idx);
       } else if (pickedUpUnits.ofStrength(1) > 0) {
         pickedUpUnits.removeStrength(1);
         gs.heldObject = Content.unit(UNITS.PEASANT);
@@ -513,15 +513,15 @@ const BotAi = {
     return null;
   },
 
-  sellCastles(gs, kingdom, placedCastleTiles) {
+  sellTowers(gs, kingdom, placedTowerTiles) {
     if (!kingdom) return;
-    for (const ti of placedCastleTiles) {
+    for (const ti of placedTowerTiles) {
       const tile = gs.tiles[ti];
-      if (tile != null && tile.content != null && tile.content.k === "castle") {
+      if (tile != null && tile.content != null && tile.content.k === "tower") {
         tile.content = null;
-        kingdom.savings += CASTLE_COST;
+        kingdom.savings += TOWER_COST;
       } else if (tile != null && tile.content == null) {
-        kingdom.savings += CASTLE_COST;
+        kingdom.savings += TOWER_COST;
       }
     }
   },
