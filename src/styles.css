@@ -140,6 +140,7 @@ body {
   width: 54px;
   height: 54px;
   border: none;
+  padding: 0;
   background: none;
   color: #f0a81e;
   cursor: pointer;

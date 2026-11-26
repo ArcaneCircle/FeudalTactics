@@ -64,6 +64,7 @@ const SPRITES = {
   peasant_icon: { sheet: "64x55", index: 0, frames: 1 },
   tower_icon: { sheet: "64x55", index: 9, frames: 1 },
   endturn_icon: { sheet: "64x64", index: 5, frames: 1 },
+  undo_icon: { sheet: "64x64", index: 6, frames: 1 },
 };
 
 const TextureAtlasHelper = {
