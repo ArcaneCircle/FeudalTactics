@@ -334,12 +334,6 @@ class MapRenderer {
     this._drawDeepWater(frameIdx);
     this._drawBeaches(items, frameIdx);
 
-    // The white/red kingdom outlines are drawn *under* the tiles, like the
-    // original: SpriteBatch draws the tiles, then ShapeRenderer's rectLines go on
-    // top only where no tile covers them. Drawing them first means each line is
-    // clipped by the tiles either side of it, which gives the correct-looking
-    // joins at hexagon vertices (no mitre spikes, no gaps).
-
     // tiles
     for (const tile of items.tiles.values()) {
       const img = tile.darken
@@ -361,6 +355,8 @@ class MapRenderer {
         th,
       );
     }
+
+    this._drawLines(items);
 
     // protection shields
     for (const shield of items.shields.values()) {
@@ -395,7 +391,6 @@ class MapRenderer {
         this._semiContent("palm_tree", pos, 0.35);
     }
 
-    this._drawLines(items);
     ctx.restore();
   }
 
