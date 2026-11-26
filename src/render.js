@@ -11,7 +11,10 @@ import {
   GameStateHelper,
   InputValidationHelper,
 } from "./core.js";
-import texturesUrl from "@assets/textures.png";
+import sheet16 from "@assets/sheets/16x16.png";
+import sheet64x55 from "@assets/sheets/64x55.png";
+import sheet64x64 from "@assets/sheets/64x64.png";
+import sheet128x128 from "@assets/sheets/128x128.png";
 
 const PLAYER_COLOR_PALETTE = [
   [51, 115, 204], // blue
@@ -30,56 +33,54 @@ const SHIELD_SIZE = 2;
 const LINE_EXTENSION = 0.14;
 const TILE_CONTENT_OFFSET_Y = HEXTILE_HEIGHT * -0.075;
 
+const SHEETS = {
+  "64x55": { url: sheet64x55, cellWidth: 64, cellHeight: 55 },
+  "64x64": { url: sheet64x64, cellWidth: 64, cellHeight: 64 },
+  "128x128": { url: sheet128x128, cellWidth: 128, cellHeight: 128 },
+  "16x16": { url: sheet16, cellWidth: 16, cellHeight: 16 },
+};
+
+const SPRITES = {
+  peasant: { sheet: "64x55", index: 0, frames: 2 },
+  spearman: { sheet: "64x55", index: 2, frames: 2 },
+  knight: { sheet: "64x55", index: 4, frames: 2 },
+  baron: { sheet: "64x55", index: 6, frames: 2 },
+  capital: { sheet: "64x55", index: 8, frames: 1 },
+  castle: { sheet: "64x55", index: 9, frames: 1 },
+  gravestone: { sheet: "64x55", index: 10, frames: 1 },
+  tree: { sheet: "64x55", index: 11, frames: 1 },
+  palm_tree: { sheet: "64x55", index: 12, frames: 1 },
+  tile_bw: { sheet: "64x64", index: 0, frames: 1 },
+  water: { sheet: "64x64", index: 1, frames: 2 },
+  beach_sand: { sheet: "64x64", index: 3, frames: 2 },
+  beach_water: { sheet: "128x128", index: 0, frames: 2 },
+  shield: { sheet: "16x16", index: 0, frames: 1 },
+};
+
 const TextureAtlasHelper = {
-  atlas: null,
-  regions: {
-    baron: [
-      [2, 2, 64, 55],
-      [200, 11, 64, 55],
-    ],
-    beach_sand: [
-      [262, 189, 64, 64],
-      [328, 189, 64, 64],
-    ],
-    beach_water: [
-      [2, 125, 128, 128],
-      [132, 125, 128, 128],
-    ],
-    capital: [200, 68, 64, 55],
-    castle: [332, 18, 64, 55],
-    gravestone: [394, 198, 64, 55],
-    knight: [
-      [68, 2, 64, 55],
-      [266, 18, 64, 55],
-    ],
-    palm_tree: [262, 132, 64, 55],
-    peasant: [
-      [266, 75, 64, 55],
-      [134, 2, 64, 55],
-    ],
-    shield: [460, 237, 16, 16],
-    spearman: [
-      [328, 132, 64, 55],
-      [332, 75, 64, 55],
-    ],
-    tile_bw: [2, 59, 64, 64],
-    tree: [394, 141, 64, 55],
-    water: [
-      [68, 59, 64, 64],
-      [134, 59, 64, 64],
-    ],
-  },
+  images: {}, // sheet name -> loaded HTMLImageElement
 
   load() {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        TextureAtlasHelper.atlas = img;
-        resolve();
-      };
-      img.onerror = reject;
-      img.src = texturesUrl;
-    });
+    const names = Object.keys(SHEETS);
+    return Promise.all(
+      names.map(
+        (name) =>
+          new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+              TextureAtlasHelper.images[name] = img;
+              resolve();
+            };
+            img.onerror = () =>
+              reject(new Error("could not load sprite sheet " + name));
+            img.src = SHEETS[name].url;
+          }),
+      ),
+    );
+  },
+
+  get ready() {
+    return Object.keys(SHEETS).every((n) => this.images[n] != null);
   },
 
   regionNameForContent(content) {
@@ -106,15 +107,22 @@ const TextureAtlasHelper = {
     }
   },
 
-  region(name, frame = 0) {
-    const r = TextureAtlasHelper.regions[name];
-    if (Array.isArray(r[0])) return r[frame % r.length];
-    return r;
+  frameCount(name) {
+    return SPRITES[name].frames;
   },
 
-  frameCount(name) {
-    const r = TextureAtlasHelper.regions[name];
-    return Array.isArray(r[0]) ? r.length : 1;
+  sprite(name, frame = 0) {
+    const def = SPRITES[name];
+    if (!def) throw new Error("unknown sprite " + name);
+    const sheet = SHEETS[def.sheet];
+    const idx = def.index + (frame % def.frames);
+    return {
+      image: TextureAtlasHelper.images[def.sheet],
+      x: idx * sheet.cellWidth,
+      y: 0,
+      w: sheet.cellWidth,
+      h: sheet.cellHeight,
+    };
   },
 };
 
@@ -233,22 +241,12 @@ class MapRenderer {
       tintAlpha;
     let c = this.imageCache.get(key);
     if (c) return c;
-    const r = TextureAtlasHelper.region(name, frame);
+    const sp = TextureAtlasHelper.sprite(name, frame);
     c = document.createElement("canvas");
-    c.width = r[2];
-    c.height = r[3];
+    c.width = sp.w;
+    c.height = sp.h;
     const cx = c.getContext("2d");
-    cx.drawImage(
-      TextureAtlasHelper.atlas,
-      r[0],
-      r[1],
-      r[2],
-      r[3],
-      0,
-      0,
-      r[2],
-      r[3],
-    );
+    cx.drawImage(sp.image, sp.x, sp.y, sp.w, sp.h, 0, 0, sp.w, sp.h);
     if (colorKey != null) {
       // The original tints the black & white tile with SpriteBatch.setColor(),
       // which MULTIPLIES the sprite by the player colour. Overlaying a flat
@@ -274,32 +272,12 @@ class MapRenderer {
         tint.width = c.width;
         tint.height = c.height;
         const tx = tint.getContext("2d");
-        tx.drawImage(
-          TextureAtlasHelper.atlas,
-          r[0],
-          r[1],
-          r[2],
-          r[3],
-          0,
-          0,
-          r[2],
-          r[3],
-        );
+        tx.drawImage(sp.image, sp.x, sp.y, sp.w, sp.h, 0, 0, sp.w, sp.h);
         tx.globalCompositeOperation = "multiply";
         tx.fillStyle = `rgb(${col[0]},${col[1]},${col[2]})`;
         tx.fillRect(0, 0, tint.width, tint.height);
         tx.globalCompositeOperation = "destination-in";
-        tx.drawImage(
-          TextureAtlasHelper.atlas,
-          r[0],
-          r[1],
-          r[2],
-          r[3],
-          0,
-          0,
-          r[2],
-          r[3],
-        );
+        tx.drawImage(sp.image, sp.x, sp.y, sp.w, sp.h, 0, 0, sp.w, sp.h);
         cx.drawImage(tint, 0, 0);
       }
     }
@@ -346,7 +324,7 @@ class MapRenderer {
     ctx.save();
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     ctx.clearRect(0, 0, cam.vw, cam.vh);
-    if (!this.items || !TextureAtlasHelper.atlas) {
+    if (!this.items || !TextureAtlasHelper.ready) {
       ctx.restore();
       return;
     }
@@ -500,22 +478,12 @@ class MapRenderer {
     const key = "rgbtint|" + name + "|" + frame + "|" + rgb;
     let c = this.imageCache.get(key);
     if (c) return c;
-    const r = TextureAtlasHelper.region(name, frame);
+    const sp = TextureAtlasHelper.sprite(name, frame);
     c = document.createElement("canvas");
-    c.width = r[2];
-    c.height = r[3];
+    c.width = sp.w;
+    c.height = sp.h;
     const cx = c.getContext("2d", { willReadFrequently: true });
-    cx.drawImage(
-      TextureAtlasHelper.atlas,
-      r[0],
-      r[1],
-      r[2],
-      r[3],
-      0,
-      0,
-      r[2],
-      r[3],
-    );
+    cx.drawImage(sp.image, sp.x, sp.y, sp.w, sp.h, 0, 0, sp.w, sp.h);
     const img = cx.getImageData(0, 0, c.width, c.height);
     const d = img.data;
     for (let i = 0; i < d.length; i += 4) {

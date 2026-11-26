@@ -23,7 +23,6 @@ import {
   MapRenderer,
   GameStateConverter,
 } from "./render.js";
-import texturesUrl from "@assets/textures.png";
 import "./styles.css";
 
 const App = {
@@ -1650,15 +1649,19 @@ const UI = {
     if (!force && key === App.hudHeldObject) return;
     App.hudHeldObject = key;
     const name = TextureAtlasHelper.regionNameForContent(held);
-    const r = TextureAtlasHelper.region(name, 0);
+    const sp = TextureAtlasHelper.sprite(name, 0);
     const inner = $("hand-inner");
-    // draw the sprite from the atlas using background positioning
-    const scale = 52 / r[2];
-    inner.style.backgroundImage = `url(${texturesUrl})`;
-    inner.style.backgroundSize = 512 * scale + "px " + 256 * scale + "px";
-    inner.style.backgroundPosition = `${-r[0] * scale}px ${-r[1] * scale}px`;
-    inner.style.width = r[2] * scale + "px";
-    inner.style.height = r[3] * scale + "px";
+    // show the sprite by windowing its sheet with background positioning
+    const scale = 52 / sp.w;
+    inner.style.backgroundImage = `url(${sp.image.src})`;
+    inner.style.backgroundSize =
+      sp.image.naturalWidth * scale +
+      "px " +
+      sp.image.naturalHeight * scale +
+      "px";
+    inner.style.backgroundPosition = `${-sp.x * scale}px ${-sp.y * scale}px`;
+    inner.style.width = sp.w * scale + "px";
+    inner.style.height = sp.h * scale + "px";
     $("hand-count").textContent =
       Content.strength(held) > 0 ? String(Content.strength(held)) : "";
     $("hand-count").style.display =
@@ -2273,7 +2276,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     await TextureAtlasHelper.load();
   } catch (e) {
-    console.error("texture atlas failed to load", e);
+    console.error("sprite sheets failed to load", e);
   }
   const canvas = $("map");
   App.renderer = new MapRenderer(canvas, App.camera);
