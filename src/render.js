@@ -30,6 +30,8 @@ const PLAYER_COLOR_CSS = PLAYER_COLOR_PALETTE.map(
 
 const WATER_TILE_SIZE = 12;
 const SHIELD_SIZE = 2;
+const BADGE_INSET_X = 0;
+const BADGE_INSET_Y = 0.15;
 const LINE_EXTENSION = 0.14;
 const TILE_CONTENT_OFFSET_Y = HEXTILE_HEIGHT * -0.075;
 
@@ -55,6 +57,10 @@ const SPRITES = {
   beach_sand: { sheet: "64x64", index: 3, frames: 2 },
   beach_water: { sheet: "128x128", index: 0, frames: 2 },
   shield: { sheet: "16x16", index: 0, frames: 1 },
+  digit1: { sheet: "16x16", index: 1, frames: 1 },
+  digit2: { sheet: "16x16", index: 2, frames: 1 },
+  digit3: { sheet: "16x16", index: 3, frames: 1 },
+  digit4: { sheet: "16x16", index: 4, frames: 1 },
 };
 
 const TextureAtlasHelper = {
@@ -358,14 +364,6 @@ class MapRenderer {
 
     this._drawLines(items);
 
-    // protection shields
-    for (const shield of items.shields.values()) {
-      const img = shield.darken
-        ? this._tintedRegion("shield", 0, null, true, 0.85)
-        : this._tintedRegion("shield", 0, null, null, 0.85);
-      this._drawWorld(img, shield.x, shield.y, SHIELD_SIZE, SHIELD_SIZE);
-    }
-
     // tile contents
     const drawAnimated = (map, darken) => {
       for (const a of map.values()) {
@@ -391,7 +389,36 @@ class MapRenderer {
         this._semiContent("palm_tree", pos, 0.35);
     }
 
+    this._drawProtectionBadges(items.protectionBadges);
+
     ctx.restore();
+  }
+
+  _drawProtectionBadges(badges) {
+    for (const badge of badges.values()) {
+      const alpha = 1;
+      const digit = "digit" + Math.max(1, Math.min(4, badge.level));
+      const digitImg = badge.darken
+        ? this._tintedRegion(digit, 0, null, true, alpha)
+        : this._tintedRegion(digit, 0, null, null, alpha);
+      const shieldImg = badge.darken
+        ? this._tintedRegion("shield", 0, null, true, alpha)
+        : this._tintedRegion("shield", 0, null, null, alpha);
+      this._drawWorld(
+        digitImg,
+        badge.x + 0.2, // make number +0.2 closer to shield
+        badge.y,
+        SHIELD_SIZE,
+        SHIELD_SIZE,
+      );
+      this._drawWorld(
+        shieldImg,
+        badge.x + SHIELD_SIZE,
+        badge.y,
+        SHIELD_SIZE,
+        SHIELD_SIZE,
+      );
+    }
   }
 
   _drawContentSprite(name, frame, pos, darken) {
@@ -640,11 +667,11 @@ const GameStateConverter = {
   convertGameState(gs) {
     const result = {
       tiles: new Map(),
+      protectionBadges: new Map(),
       nonAnimatedContents: new Map(),
       darkenedNonAnimatedContents: new Map(),
       animatedContents: new Map(),
       darkenedAnimatedContents: new Map(),
-      shields: new Map(),
       semitransparentGraveStones: new Map(),
       semitransparentOakTrees: [],
       semitransparentPalmTrees: [],
@@ -758,7 +785,7 @@ const GameStateConverter = {
             y: mapCoords.y - HEX_OUTER_RADIUS,
           });
       }
-      // protection shields
+      // protection badge
       GameStateConverter.createProtectionIndicators(
         gs,
         tile,
@@ -810,34 +837,15 @@ const GameStateConverter = {
       (gs.activeKingdom != null && tile.kingdom === gs.activeKingdom);
     if (!should) return;
     const level = GameStateHelper.getProtectionLevel(gs, tile);
-    const put = (x, y) =>
-      result.shields.set(HexMapHelper.key({ x, y }), {
-        x,
-        y,
-        darken: drawTile.darken,
-      });
-    switch (level) {
-      case 4:
-        put(mapCoords.x - 2 * SHIELD_SIZE, mapCoords.y - SHIELD_SIZE / 2);
-        put(mapCoords.x - SHIELD_SIZE, mapCoords.y - SHIELD_SIZE / 2);
-        put(mapCoords.x, mapCoords.y - SHIELD_SIZE / 2);
-        put(mapCoords.x + SHIELD_SIZE, mapCoords.y - SHIELD_SIZE / 2);
-        break;
-      case 3:
-        put(mapCoords.x - SHIELD_SIZE * 1.5, mapCoords.y - SHIELD_SIZE / 2);
-        put(mapCoords.x - SHIELD_SIZE / 2, mapCoords.y - SHIELD_SIZE / 2);
-        put(mapCoords.x + SHIELD_SIZE / 2, mapCoords.y - SHIELD_SIZE / 2);
-        break;
-      case 2:
-        put(mapCoords.x - SHIELD_SIZE, mapCoords.y - SHIELD_SIZE / 2);
-        put(mapCoords.x, mapCoords.y - SHIELD_SIZE / 2);
-        break;
-      case 1:
-        put(mapCoords.x - SHIELD_SIZE / 2, mapCoords.y - SHIELD_SIZE / 2);
-        break;
-      default:
-        break;
-    }
+    if (level <= 0) return;
+    const cornerX = mapCoords.x + HEXTILE_WIDTH / 4;
+    const cornerY = mapCoords.y - HEXTILE_HEIGHT / 2;
+    result.protectionBadges.set(tile.idx, {
+      x: cornerX - 2 * SHIELD_SIZE - BADGE_INSET_X,
+      y: cornerY + BADGE_INSET_Y,
+      level,
+      darken: drawTile.darken,
+    });
   },
 
   hexCornerRing(mc) {
@@ -1022,6 +1030,8 @@ export {
   PLAYER_COLOR_CSS,
   WATER_TILE_SIZE,
   SHIELD_SIZE,
+  BADGE_INSET_X,
+  BADGE_INSET_Y,
   LINE_EXTENSION,
   TILE_CONTENT_OFFSET_Y,
   TextureAtlasHelper,
