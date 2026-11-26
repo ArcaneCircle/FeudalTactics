@@ -17,12 +17,12 @@ import sheet64x64 from "@assets/sheets/64x64.png";
 import sheet128x128 from "@assets/sheets/128x128.png";
 
 const PLAYER_COLOR_PALETTE = [
-  [51, 115, 204], // blue
-  [191, 128, 0], // brown
-  [255, 171, 171], // pink
-  [255, 255, 0], // yellow
-  [255, 255, 255], // white
-  [0, 255, 0], // green
+  [0, 129, 0],
+  [17, 70, 45],
+  [177, 188, 41],
+  [156, 119, 21],
+  [108, 70, 39],
+  [220, 220, 220],
 ];
 const PLAYER_COLOR_CSS = PLAYER_COLOR_PALETTE.map(
   (c) => `rgb(${c[0]},${c[1]},${c[2]})`,
@@ -292,7 +292,7 @@ class MapRenderer {
     }
     if (darken) {
       cx.globalCompositeOperation = "source-atop";
-      cx.fillStyle = "rgba(0,0,0,0.45)";
+      cx.fillStyle = "rgba(0,0,0,0.3)";
       cx.fillRect(0, 0, c.width, c.height);
     }
     if (alpha != null) {
