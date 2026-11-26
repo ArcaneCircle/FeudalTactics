@@ -1529,6 +1529,42 @@ const Setup = {
 // ---------------------------------------------------------------------------
 // UI
 // ---------------------------------------------------------------------------
+// Alpha bounding box of one sprite cell, in cell-local pixels, plus a cache keyed
+// by sheet + cell so measuring happens once per sprite and not once per paint.
+const spriteInkCache = new Map();
+function spriteInk(sp) {
+  const key = sp.w + "x" + sp.h + "@" + sp.x + "," + sp.y;
+  const hit = spriteInkCache.get(key);
+  if (hit !== undefined) return hit;
+  const c = document.createElement("canvas");
+  c.width = sp.w;
+  c.height = sp.h;
+  const cx = c.getContext("2d", { willReadFrequently: true });
+  cx.drawImage(sp.image, sp.x, sp.y, sp.w, sp.h, 0, 0, sp.w, sp.h);
+  let data;
+  try {
+    data = cx.getImageData(0, 0, sp.w, sp.h).data;
+  } catch (e) {
+    return null; // canvas is somehow tainted: caller keeps the icon hidden
+  }
+  let x0 = sp.w,
+    y0 = sp.h,
+    x1 = -1,
+    y1 = -1;
+  for (let y = 0; y < sp.h; y++) {
+    for (let x = 0; x < sp.w; x++) {
+      if (data[(y * sp.w + x) * 4 + 3] === 0) continue;
+      if (x < x0) x0 = x;
+      if (y < y0) y0 = y;
+      if (x > x1) x1 = x;
+      if (y > y1) y1 = y;
+    }
+  }
+  const ink = x1 < 0 ? null : { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 };
+  spriteInkCache.set(key, ink);
+  return ink;
+}
+
 const UI = {
   hudHeldObject: undefined,
 
@@ -1633,6 +1669,34 @@ const UI = {
       !(active.type === "HUMAN" && App.undoStack.length > 0) ||
       App.enemyRunning;
     UI.updateHand(false);
+  },
+
+  paintSprite(element, name, boxPx) {
+    const sp = TextureAtlasHelper.sprite(name, 0);
+    if (!sp.image) return; // sheets not decoded yet: painted again after load
+    const ink = spriteInk(sp);
+    if (!ink) return;
+    const scale = boxPx / Math.max(ink.w, ink.h);
+    element.style.imageRendering = "pixelated";
+    element.style.backgroundRepeat = "no-repeat";
+    element.style.backgroundImage = `url(${sp.image.src})`;
+    element.style.backgroundSize =
+      sp.image.naturalWidth * scale +
+      "px " +
+      sp.image.naturalHeight * scale +
+      "px";
+    const offX = boxPx / 2 - (ink.x + ink.w / 2) * scale - sp.x * scale;
+    const offY = boxPx / 2 - (ink.y + ink.h / 2) * scale - sp.y * scale;
+    element.style.backgroundPosition = `${offX}px ${offY}px`;
+    element.style.width = boxPx + "px";
+    element.style.height = boxPx + "px";
+  },
+
+  renderToolIcons() {
+    for (const el of document.querySelectorAll(".tool-icon[data-icon]")) {
+      const px = parseFloat(el.dataset.size || "46");
+      UI.paintSprite(el, el.dataset.icon, px);
+    }
   },
 
   updateHand(force) {
@@ -2278,6 +2342,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (e) {
     console.error("sprite sheets failed to load", e);
   }
+  UI.renderToolIcons();
   const canvas = $("map");
   App.renderer = new MapRenderer(canvas, App.camera);
   resize();

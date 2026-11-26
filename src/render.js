@@ -61,6 +61,9 @@ const SPRITES = {
   digit2: { sheet: "16x16", index: 2, frames: 1 },
   digit3: { sheet: "16x16", index: 3, frames: 1 },
   digit4: { sheet: "16x16", index: 4, frames: 1 },
+  peasant_icon: { sheet: "64x55", index: 0, frames: 1 },
+  castle_icon: { sheet: "64x55", index: 9, frames: 1 },
+  endturn_icon: { sheet: "64x64", index: 5, frames: 1 },
 };
 
 const TextureAtlasHelper = {
