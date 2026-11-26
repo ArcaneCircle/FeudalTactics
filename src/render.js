@@ -32,6 +32,7 @@ const WATER_TILE_SIZE = 12;
 const SHIELD_SIZE = 2;
 const BADGE_INSET_X = 0;
 const BADGE_INSET_Y = 0.15;
+const BADGE_DARKENED_OPACITY = 0.65;
 const LINE_EXTENSION = 0.14;
 const TILE_CONTENT_OFFSET_Y = HEXTILE_HEIGHT * -0.075;
 
@@ -293,12 +294,13 @@ class MapRenderer {
     }
     if (darken) {
       cx.globalCompositeOperation = "source-atop";
-      cx.fillStyle = "rgba(0,0,0,0.3)";
+      cx.fillStyle = "rgba(0,0,0,0.4)";
       cx.fillRect(0, 0, c.width, c.height);
     }
     if (alpha != null) {
       cx.globalCompositeOperation = "destination-in";
       cx.globalAlpha = alpha;
+      cx.fillStyle = "#000";
       cx.fillRect(0, 0, c.width, c.height);
     }
     this.imageCache.set(key, c);
@@ -400,7 +402,7 @@ class MapRenderer {
 
   _drawProtectionBadges(badges) {
     for (const badge of badges.values()) {
-      const alpha = 1;
+      const alpha = badge.darken ? BADGE_DARKENED_OPACITY : 1;
       const digit = "digit" + Math.max(1, Math.min(4, badge.level));
       const digitImg = badge.darken
         ? this._tintedRegion(digit, 0, null, true, alpha)
