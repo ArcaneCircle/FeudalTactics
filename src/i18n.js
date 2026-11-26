@@ -19,9 +19,9 @@ export const I18N = (() => {
       "settings.autoEnd": "Auto-end turn when all units have acted",
 
       "about.p1":
-        "This is a web port of <b>Feudal Tactics</b> by Sesu8642 and contributors, a medieval strategy game inspired by Sean O'Connor's <i>Slay</i>. Game rules, map generation and enemy AI are ported from the original GPL-3.0-or-later Java source.",
+        "A port of <b>Feudal Tactics</b>, the medieval strategy game by Sesu8642 inspired by Sean O'Connor's <i>Slay</i>. The rules, map generation and enemy AI come from the original GPL-3.0-or-later Java source, reimplemented to run in a browser.",
       "about.p2":
-        "Original game: <b>github.com/Sesu8642/FeudalTactics</b> (GPL-3.0-or-later). Textures and rules come from that project; this web version is a fan port for webxdc messengers.",
+        "This port adds enhanced graphics and extra features: a list of challenges shared in the chat and a daily challenge.",
       "about.p3":
         "Runs fully offline inside a webxdc mini app. No tracking, no network access, no ads. Your games are saved locally in this chat's app storage.",
       "about.p4":
@@ -196,9 +196,9 @@ export const I18N = (() => {
         "Zug automatisch beenden, wenn alle Einheiten gehandelt haben",
 
       "about.p1":
-        "Dies ist eine Web-Umsetzung von <b>Feudal Tactics</b> von Sesu8642 und Mitwirkenden, einem mittelalterlichen Strategiespiel mit Anleihen bei Sean O'Connors <i>Slay</i>. Spielregeln, Kartengenerierung und gegnerische KI stammen aus dem ursprünglichen Java-Quellcode unter GPL-3.0-or-later.",
+        "Eine Umsetzung von <b>Feudal Tactics</b>, dem mittelalterlichen Strategiespiel von Sesu8642 mit Anleihen bei Sean O'Connors <i>Slay</i>. Spielregeln, Kartengenerierung und gegnerische KI stammen aus dem ursprünglichen Java-Quellcode unter GPL-3.0-or-later und wurden für den Browser neu umgesetzt.",
       "about.p2":
-        "Originalspiel: <b>github.com/Sesu8642/FeudalTactics</b> (GPL-3.0-or-later). Texturen und Regeln stammen aus diesem Projekt; diese Web-Version ist eine Fan-Umsetzung für webxdc-Messenger.",
+        "Diese Umsetzung bringt aufgewertete Grafik und zusätzliche Funktionen mit: eine Liste der im Chat geteilten Herausforderungen und eine tägliche Herausforderung.",
       "about.p3":
         "Läuft vollständig offline als webxdc-Mini-App. Kein Tracking, kein Netzwerkzugriff, keine Werbung. Deine Spiele werden lokal im App-Speicher dieses Chats gesichert.",
       "about.p4":
@@ -381,9 +381,9 @@ export const I18N = (() => {
         "Terminer le tour automatiquement quand toutes les unités ont agi",
 
       "about.p1":
-        "Ceci est un portage web de <b>Feudal Tactics</b> par Sesu8642 et ses contributeurs, un jeu de stratégie médiéval inspiré de <i>Slay</i> de Sean O'Connor. Les règles, la génération des cartes et l'IA ennemie proviennent du code source Java original sous GPL-3.0-or-later.",
+        "Une adaptation de <b>Feudal Tactics</b>, le jeu de stratégie médiéval de Sesu8642 inspiré de <i>Slay</i> de Sean O'Connor. Les règles, la génération des cartes et l'IA ennemie proviennent du code source Java original sous GPL-3.0-or-later et ont été réécrites pour fonctionner dans un navigateur.",
       "about.p2":
-        "Jeu original : <b>github.com/Sesu8642/FeudalTactics</b> (GPL-3.0-or-later). Les textures et les règles viennent de ce projet ; cette version web est un portage de fans pour les messageries webxdc.",
+        "Cette version apporte des graphismes améliorés et des fonctionnalités supplémentaires : une liste des défis partagés dans la discussion et un défi quotidien.",
       "about.p3":
         "Fonctionne entièrement hors ligne dans une mini-application webxdc. Aucun suivi, aucun accès réseau, aucune publicité. Tes parties sont enregistrées localement dans le stockage de cette discussion.",
       "about.p4":
@@ -560,9 +560,9 @@ export const I18N = (() => {
         "Termina il turno automaticamente quando tutte le unità hanno agito",
 
       "about.p1":
-        "Questo è un port web di <b>Feudal Tactics</b> di Sesu8642 e dei suoi collaboratori, un gioco di strategia medievale ispirato a <i>Slay</i> di Sean O'Connor. Regole, generazione delle mappe e IA nemica provengono dal codice sorgente Java originale sotto GPL-3.0-or-later.",
+        "Un adattamento di <b>Feudal Tactics</b>, il gioco di strategia medievale di Sesu8642 ispirato a <i>Slay</i> di Sean O'Connor. Regole, generazione delle mappe e IA nemica provengono dal codice sorgente Java originale sotto GPL-3.0-or-later e sono state riscritte per il browser.",
       "about.p2":
-        "Gioco originale: <b>github.com/Sesu8642/FeudalTactics</b> (GPL-3.0-or-later). Texture e regole vengono da quel progetto; questa versione web è un port amatoriale per i messenger webxdc.",
+        "Questa versione aggiunge grafica migliorata e funzioni extra: un elenco delle sfide condivise nella chat e una sfida giornaliera.",
       "about.p3":
         "Funziona completamente offline dentro una mini app webxdc. Nessun tracciamento, nessun accesso alla rete, nessuna pubblicità. Le tue partite vengono salvate localmente nella memoria dell'app di questa chat.",
       "about.p4":
@@ -739,9 +739,9 @@ export const I18N = (() => {
         "Terminar el turno automáticamente cuando todas las unidades hayan actuado",
 
       "about.p1":
-        "Esto es un port web de <b>Feudal Tactics</b> de Sesu8642 y sus colaboradores, un juego de estrategia medieval inspirado en <i>Slay</i> de Sean O'Connor. Las reglas, la generación de mapas y la IA enemiga provienen del código fuente Java original bajo GPL-3.0-or-later.",
+        "Una adaptación de <b>Feudal Tactics</b>, el juego de estrategia medieval de Sesu8642 inspirado en <i>Slay</i> de Sean O'Connor. Las reglas, la generación de mapas y la IA enemiga provienen del código fuente Java original bajo GPL-3.0-or-later y se han reescrito para funcionar en el navegador.",
       "about.p2":
-        "Juego original: <b>github.com/Sesu8642/FeudalTactics</b> (GPL-3.0-or-later). Las texturas y las reglas vienen de ese proyecto; esta versión web es un port de fans para mensajería webxdc.",
+        "Esta versión añade gráficos mejorados y funciones extra: una lista de los retos compartidos en el chat y un reto diario.",
       "about.p3":
         "Funciona totalmente sin conexión dentro de una mini app webxdc. Sin rastreo, sin acceso a la red y sin publicidad. Tus partidas se guardan localmente en el almacenamiento de esta conversación.",
       "about.p4":
@@ -920,9 +920,9 @@ export const I18N = (() => {
         "Terminar o turno automaticamente quando todas as unidades tiverem agido",
 
       "about.p1":
-        "Este é um port web de <b>Feudal Tactics</b>, de Sesu8642 e colaboradores, um jogo de estratégia medieval inspirado em <i>Slay</i>, de Sean O'Connor. As regras, a geração de mapas e a IA inimiga vêm do código-fonte Java original sob GPL-3.0-or-later.",
+        "Uma adaptação de <b>Feudal Tactics</b>, o jogo de estratégia medieval de Sesu8642 inspirado em <i>Slay</i>, de Sean O'Connor. As regras, a geração de mapas e a IA inimiga vêm do código-fonte Java original sob GPL-3.0-or-later e foram reescritas para funcionar no navegador.",
       "about.p2":
-        "Jogo original: <b>github.com/Sesu8642/FeudalTactics</b> (GPL-3.0-or-later). As texturas e as regras vêm desse projeto; esta versão web é um port de fãs para mensageiros webxdc.",
+        "Esta versão traz gráficos melhorados e funcionalidades extra: uma lista dos desafios partilhados no chat e um desafio diário.",
       "about.p3":
         "Funciona totalmente offline dentro de uma mini app webxdc. Sem rastreio, sem acesso à rede e sem publicidade. Os teus jogos são guardados localmente no armazenamento desta conversa.",
       "about.p4":
