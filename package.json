@@ -5,11 +5,13 @@
     "start": "vite --port 3000",
     "fix": "prettier --write .",
     "check": "prettier --check .",
-    "build": "vite build"
+    "build": "vite build",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@webxdc/vite-plugins": "latest",
     "prettier": "latest",
+    "typescript": "^5.9.3",
     "vite": "latest"
   }
 }

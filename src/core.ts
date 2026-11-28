@@ -3,25 +3,167 @@
 // "Feudal Tactics" by Sesu8642 (GPL-3.0-or-later):
 // https://github.com/Sesu8642/FeudalTactics
 
-import { t } from "./i18n.js";
+import { t } from "./i18n";
+
+export type UnitType = "PEASANT" | "SPEARMAN" | "KNIGHT" | "BARON";
+export type UnitStrength = 1 | 2 | 3 | 4;
+
+export type IntelligenceLevel = "LEVEL_1" | "LEVEL_2" | "LEVEL_3" | "LEVEL_4";
+
+export type MapSizeName = "SMALL" | "MEDIUM" | "LARGE" | "XLARGE" | "XXLARGE";
+export type DensityName = "LOOSE" | "MEDIUM" | "DENSE";
+
+export interface HexCoords {
+  x: number;
+  y: number;
+}
+
+export interface WorldCoords {
+  x: number;
+  y: number;
+}
+
+export type Content =
+  | { k: "unit"; t: UnitType; canAct: boolean }
+  | { k: "tower" }
+  | { k: "capital" }
+  | { k: "tree" }
+  | { k: "palm" }
+  | { k: "gravestone" };
+
+export type ContentKind = Content["k"];
+export type ContentType = Content;
+
+export type UnitContent = Extract<Content, { k: "unit" }>;
+
+export interface Tile {
+  pos: HexCoords;
+  player: number | null;
+  content: Content | null;
+  kingdom: number | null;
+  idx: number;
+  water?: boolean;
+}
+
+export interface Kingdom {
+  id: number;
+  player: number;
+  savings: number;
+  tiles: number[];
+  tileSet: Set<number>;
+  doneMoving: boolean;
+  wasActiveInCurrentTurn: boolean;
+}
+
+export interface GamePlayer {
+  index: number;
+  type: "HUMAN" | "BOT";
+  roundOfDefeat: number | null;
+}
+
+export interface GameConfig {
+  seed: number | string;
+  playerCount: number;
+  humanIndex: number;
+  botLevel: IntelligenceLevel;
+  mapSize: MapSizeName;
+  density: DensityName;
+  landMass: number;
+  challengeId?: string | null;
+}
+
+export interface GameStateData {
+  players: GamePlayer[];
+  winner: number | null;
+  winningRound: number | null;
+  playerTurn: number;
+  round: number;
+  tiles: Tile[];
+  kingdoms: Kingdom[];
+  activeKingdom: number | null;
+  heldObject: Content | null;
+  botIntelligence: IntelligenceLevel;
+  seed: number | string | null;
+  scenario: string;
+  nextKingdomId: number;
+  density?: number;
+  config?: GameConfig | null;
+  challengeId?: string | null;
+}
+
+export interface GameState extends GameStateData {
+  tileMap: Map<string, Tile>;
+  kingdomById: Map<number, Kingdom>;
+}
+
+export interface Intelligence {
+  level: number;
+  readonly name: string;
+  chanceToConquerPerTurn: number;
+  blockingObjectRemovalScoreTreshold: number;
+  reconsidersWhichTilesToProtect: boolean;
+  protectWithTowerScoreTreshold: number;
+  protectWithUnitScoreTreshold: number;
+  attackOtherBotsBias: number;
+  smartDefending: boolean;
+  smartAttacking: boolean;
+}
+
+export interface UnitTypeInfo {
+  type: UnitType;
+  strength: UnitStrength;
+  salary: number;
+  cost: number;
+  readonly name: string;
+}
+
+export type MoveType =
+  | "PICK_UP"
+  | "PLACE_OWN"
+  | "COMBINE_UNITS"
+  | "CONQUER"
+  | "BUY_PEASANT"
+  | "BUY_TOWER"
+  | "BUY_AND_PLACE_PEASANT"
+  | "BUY_AND_PLACE_TOWER"
+  | "ACTIVATE_KINGDOM"
+  | "END_TURN"
+  | "UNDO_LAST_MOVE";
+
+export interface PlayerMove {
+  type: MoveType;
+  pos?: HexCoords;
+}
 
 // ---------------------------------------------------------------------------
 // Seeded PRNG: a bit-exact port of java.util.Random, so maps are identical to
 // the original game for the same seed (same 48-bit LCG, same next(bits) logic
 // with the overflow bug Java has).
 // ---------------------------------------------------------------------------
-function Random(seed) {
+export interface RandomInstance {
+  seed: bigint;
+  next(bits: number): number;
+  nextInt(bound?: number): number;
+  nextFloat(): number;
+  nextDouble(): number;
+  nextBoolean(): boolean;
+  shuffle<T>(list: T[]): T[];
+}
+
+const Random = function (this: RandomInstance, seed: number | string) {
   // Java seeds with (seed ^ 0x5DEECE66DL) & ((1L << 48) - 1) via
   // (initialSeed ^ multiplier) & mask; seeds are longs there, we keep the
   // low 32 bits which is all a JS number can carry losslessly.
-  this.seed = (BigInt(Math.trunc(seed)) ^ 0x5deece66dn) & 0xffffffffffffn;
-}
+  const numericSeed = typeof seed === "string" ? Number(seed) : seed;
+  this.seed =
+    (BigInt(Math.trunc(numericSeed)) ^ 0x5deece66dn) & 0xffffffffffffn;
+} as unknown as new (seed: number | string) => RandomInstance;
 
 const RMULT = 0x5deece66dn;
 const RADD = 0xbn;
 const RMASK = (1n << 48n) - 1n;
 
-Random.prototype.next = function (bits) {
+Random.prototype.next = function (this: RandomInstance, bits: number) {
   this.seed = (this.seed * RMULT + RADD) & RMASK;
   // Java: (int)(seed >>> (48 - bits)) — the int cast may make this negative
   let v = Number(this.seed >> BigInt(48 - bits));
@@ -29,7 +171,7 @@ Random.prototype.next = function (bits) {
   return v | 0;
 };
 
-Random.prototype.nextInt = function (bound) {
+Random.prototype.nextInt = function (this: RandomInstance, bound?: number) {
   if (bound == null) return this.next(32);
   if (bound <= 0) throw new Error("bound must be positive");
   // power of two: (int)((bound * (long)next(31)) >> 31)
@@ -44,22 +186,22 @@ Random.prototype.nextInt = function (bound) {
   return val;
 };
 
-Random.prototype.nextFloat = function () {
+Random.prototype.nextFloat = function (this: RandomInstance) {
   return this.next(24) * (1 / 16777216);
 };
 
-Random.prototype.nextDouble = function () {
+Random.prototype.nextDouble = function (this: RandomInstance) {
   return (
     (this.next(26) * 134217728.0 + this.next(27)) * (1 / 9007199254740992.0)
   );
 };
 
-Random.prototype.nextBoolean = function () {
+Random.prototype.nextBoolean = function (this: RandomInstance) {
   return this.next(1) !== 0;
 };
 
 // Java's Collections.shuffle(list, rnd)
-Random.prototype.shuffle = function (list) {
+Random.prototype.shuffle = function <T>(this: RandomInstance, list: T[]) {
   for (let i = list.length; i > 1; i--) {
     const j = this.nextInt(i);
     const tmp = list[i - 1];
@@ -70,7 +212,7 @@ Random.prototype.shuffle = function (list) {
 };
 
 // Java-style rounding (half up) matching Math.round for our inputs.
-function javaRound(v) {
+function javaRound(v: number) {
   return Math.floor(v + 0.5);
 }
 
@@ -83,7 +225,7 @@ const HEXTILE_WIDTH = HEX_OUTER_RADIUS * 2;
 const HEXTILE_HEIGHT = HEX_OUTER_RADIUS * Math.sqrt(3);
 
 const HexMapHelper = {
-  hexCoordsToWorldCoords(q) {
+  hexCoordsToWorldCoords(q: HexCoords): WorldCoords {
     const cubeZ = -q.x - q.y;
     const worldX = q.x * HEX_OUTER_RADIUS * 1.5;
     const worldY =
@@ -91,13 +233,13 @@ const HexMapHelper = {
     return { x: worldX, y: worldY };
   },
 
-  worldCoordsToHexCoords(w) {
+  worldCoordsToHexCoords(w: WorldCoords): HexCoords {
     const hexX = ((2 / 3) * w.x) / HEX_OUTER_RADIUS;
     const hexY = ((-1 / 3) * w.x + (Math.sqrt(3) / 3) * w.y) / HEX_OUTER_RADIUS;
     return HexMapHelper.roundToHexCoords(hexX, hexY);
   },
 
-  roundToHexCoords(cx, cy) {
+  roundToHexCoords(cx: number, cy: number): HexCoords {
     const cubeZ = -cx - cy;
     let x = javaRound(cx);
     const y = javaRound(cy);
@@ -113,7 +255,7 @@ const HexMapHelper = {
     return { x: x + 0.0, y: z + 0.0 };
   },
 
-  getNeighborCoords(q) {
+  getNeighborCoords(q: HexCoords): HexCoords[] {
     return [
       { x: q.x - 1, y: q.y },
       { x: q.x, y: q.y - 1 },
@@ -124,7 +266,7 @@ const HexMapHelper = {
     ];
   },
 
-  getNeighborsNeighborCoords(q) {
+  getNeighborsNeighborCoords(q: HexCoords): HexCoords[] {
     return [
       { x: q.x, y: q.y - 2 },
       { x: q.x + 1, y: q.y - 2 },
@@ -141,7 +283,7 @@ const HexMapHelper = {
     ];
   },
 
-  getNeighborTiles(gs, tile) {
+  getNeighborTiles(gs: GameState, tile: Tile): (Tile | null)[] {
     const out = [];
     for (const c of HexMapHelper.getNeighborCoords(tile.pos)) {
       out.push(gs.tileMap.get(HexMapHelper.key(c)) || null);
@@ -149,7 +291,7 @@ const HexMapHelper = {
     return out;
   },
 
-  getNeighborsNeighborTiles(gs, tile) {
+  getNeighborsNeighborTiles(gs: GameState, tile: Tile): (Tile | null)[] {
     const out = [];
     for (const c of HexMapHelper.getNeighborsNeighborCoords(tile.pos)) {
       out.push(gs.tileMap.get(HexMapHelper.key(c)) || null);
@@ -157,7 +299,7 @@ const HexMapHelper = {
     return out;
   },
 
-  getUnusedNeighborCoords(gs, q) {
+  getUnusedNeighborCoords(gs: GameState, q: HexCoords): HexCoords[] {
     const out = [];
     for (const c of HexMapHelper.getNeighborCoords(q)) {
       if (!gs.tileMap.has(HexMapHelper.key(c))) out.push(c);
@@ -165,7 +307,11 @@ const HexMapHelper = {
     return out;
   },
 
-  getMapDimensionsInWorldCoords(coords) {
+  getMapDimensionsInWorldCoords(coords: HexCoords[]): {
+    width: number;
+    height: number;
+    center: WorldCoords;
+  } {
     let minX = 0,
       maxX = 0,
       minY = 0,
@@ -190,12 +336,12 @@ const HexMapHelper = {
     };
   },
 
-  key(c) {
+  key(c: HexCoords): string {
     return c.x + "," + c.y;
   },
 
   // deterministic tile comparison like HexTile.compareTo
-  compareTiles(a, b) {
+  compareTiles(a: Tile, b: Tile): number {
     if (a.pos.x < b.pos.x) return -1;
     if (a.pos.x > b.pos.x) return 1;
     if (a.pos.y < b.pos.y) return -1;
@@ -207,7 +353,7 @@ const HexMapHelper = {
 // ---------------------------------------------------------------------------
 // Game constants
 // ---------------------------------------------------------------------------
-const UNITS = {
+const UNITS: Record<UnitType, UnitTypeInfo> = {
   PEASANT: {
     type: "PEASANT",
     strength: 1,
@@ -245,7 +391,13 @@ const UNITS = {
     },
   },
 };
-const UNIT_BY_STRENGTH = {
+const UNIT_STRENGTH: Record<UnitType, UnitStrength> = {
+  PEASANT: 1,
+  SPEARMAN: 2,
+  KNIGHT: 3,
+  BARON: 4,
+};
+const UNIT_BY_STRENGTH: Record<UnitStrength, UnitTypeInfo> = {
   1: UNITS.PEASANT,
   2: UNITS.SPEARMAN,
   3: UNITS.KNIGHT,
@@ -258,7 +410,7 @@ const DEAFULT_INITIAL_TREE_DENSITY = 0.1;
 const WIN_LANDMASS_PERCENTAGE = 0.8;
 
 // Intelligence levels (port of Intelligence.java)
-const INTELLIGENCE = {
+const INTELLIGENCE: Record<IntelligenceLevel, Intelligence> = {
   LEVEL_1: {
     level: 1,
     get name() {
@@ -317,38 +469,42 @@ const INTELLIGENCE = {
   },
 };
 
-const MAP_SIZES = {
+const MAP_SIZES: Record<MapSizeName, number> = {
   SMALL: 50,
   MEDIUM: 150,
   LARGE: 250,
   XLARGE: 500,
   XXLARGE: 1000,
 };
-const DENSITIES = { LOOSE: 3, MEDIUM: 0, DENSE: -3 };
+const DENSITIES: Record<DensityName, number> = {
+  LOOSE: 3,
+  MEDIUM: 0,
+  DENSE: -3,
+};
 
 const Content = {
-  unit(type) {
+  unit(type: UnitTypeInfo): UnitContent {
     return { k: "unit", t: type.type, canAct: true };
   },
-  tower() {
+  tower(): Content {
     return { k: "tower" };
   },
-  capital() {
+  capital(): Content {
     return { k: "capital" };
   },
-  tree() {
+  tree(): Content {
     return { k: "tree" };
   },
-  palm() {
+  palm(): Content {
     return { k: "palm" };
   },
-  gravestone() {
+  gravestone(): Content {
     return { k: "gravestone" };
   },
-  copy(c) {
+  copy(c: Content | null): Content | null {
     return c == null ? null : Object.assign({}, c);
   },
-  strength(c) {
+  strength(c: Content | null): number {
     if (c == null) return 0;
     switch (c.k) {
       case "unit":
@@ -361,24 +517,24 @@ const Content = {
         return 0;
     }
   },
-  isBlocking(c) {
+  isBlocking(c: Content | null): boolean {
     return (
       c != null && (c.k === "tree" || c.k === "palm" || c.k === "gravestone")
     );
   },
-  isTreeish(c) {
+  isTreeish(c: Content | null): boolean {
     return c != null && (c.k === "tree" || c.k === "palm");
   },
 };
-function unitStrength(c) {
-  return { PEASANT: 1, SPEARMAN: 2, KNIGHT: 3, BARON: 4 }[c.t];
+function unitStrength(c: UnitContent): UnitStrength {
+  return UNIT_STRENGTH[c.t];
 }
-function unitStrengthStatic(type) {
-  return { PEASANT: 1, SPEARMAN: 2, KNIGHT: 3, BARON: 4 }[type];
+function unitStrengthStatic(type: UnitType): UnitStrength {
+  return UNIT_STRENGTH[type];
 }
 
 const GameStateHelper = {
-  createEmpty() {
+  createEmpty(): GameState {
     const gs = {
       players: [],
       winner: null,
@@ -392,26 +548,26 @@ const GameStateHelper = {
       botIntelligence: "LEVEL_1",
       seed: null,
       scenario: "NONE",
-    };
-    GameStateHelper.prepare(gs);
-    return gs;
+    } as unknown as GameStateData;
+    return GameStateHelper.prepare(gs);
   },
 
   // Rebuilds derived indexes. `tiles` is the authoritative list; kingdoms
   // store tile indices.
-  prepare(gs) {
-    gs.tileMap = new Map();
+  prepare(gs: GameStateData): GameState {
+    const prepared = gs as unknown as GameState;
+    prepared.tileMap = new Map();
     for (let i = 0; i < gs.tiles.length; i++) {
       const t = gs.tiles[i];
       t.idx = i;
-      gs.tileMap.set(HexMapHelper.key(t.pos), t);
+      prepared.tileMap.set(HexMapHelper.key(t.pos), t);
     }
-    gs.kingdomById = new Map();
+    prepared.kingdomById = new Map();
     let maxId = 0;
     for (const k of gs.kingdoms) {
       if (typeof k.id !== "number" || !isFinite(k.id)) k.id = ++maxId;
       k.tileSet = new Set(k.tiles);
-      gs.kingdomById.set(k.id, k);
+      prepared.kingdomById.set(k.id, k);
       if (k.id > maxId) maxId = k.id;
     }
     if (
@@ -421,19 +577,19 @@ const GameStateHelper = {
     ) {
       gs.nextKingdomId = maxId + 1;
     }
-    return gs;
+    return prepared;
   },
 
   // ---------- structural helpers ----------
-  getActivePlayer(gs) {
+  getActivePlayer(gs: GameState): GamePlayer {
     return gs.players[gs.playerTurn];
   },
 
-  kingdomOwnsTile(k, tile) {
+  kingdomOwnsTile(k: Kingdom, tile: Tile): boolean {
     return k.tileSet.has(tile.idx);
   },
 
-  addTileToKingdom(gs, k, tile) {
+  addTileToKingdom(gs: GameState, k: Kingdom, tile: Tile): void {
     if (!k.tileSet.has(tile.idx)) {
       k.tiles.push(tile.idx);
       k.tileSet.add(tile.idx);
@@ -441,7 +597,7 @@ const GameStateHelper = {
     tile.kingdom = k.id;
   },
 
-  removeTileFromKingdomStruct(gs, tile) {
+  removeTileFromKingdomStruct(gs: GameState, tile: Tile): Kingdom | null {
     const k = tile.kingdom != null ? gs.kingdomById.get(tile.kingdom) : null;
     if (k == null) return null;
     const i = k.tiles.indexOf(tile.idx);
@@ -451,12 +607,18 @@ const GameStateHelper = {
     return k;
   },
 
-  tileAt(gs, coords) {
+  tileAt(gs: GameState, coords: HexCoords): Tile | null {
     return gs.tileMap.get(HexMapHelper.key(coords)) || null;
   },
 
+  kingdomById(gs: GameState, id: number | null): Kingdom {
+    const k = id == null ? null : gs.kingdomById.get(id);
+    if (k == null) throw new Error("no kingdom " + id);
+    return k;
+  },
+
   // deep copy (used for undo history and bot previews)
-  copy(gs) {
+  copy(gs: GameState): GameStateData {
     return {
       players: gs.players.map((p) => ({
         index: p.index,
@@ -467,20 +629,26 @@ const GameStateHelper = {
       winningRound: gs.winningRound,
       playerTurn: gs.playerTurn,
       round: gs.round,
-      tiles: gs.tiles.map((t) => ({
-        pos: { x: t.pos.x, y: t.pos.y },
-        player: t.player,
-        content: Content.copy(t.content),
-        kingdom: t.kingdom,
-      })),
-      kingdoms: gs.kingdoms.map((k) => ({
-        id: k.id,
-        player: k.player,
-        savings: k.savings,
-        tiles: k.tiles.slice(),
-        doneMoving: !!k.doneMoving,
-        wasActiveInCurrentTurn: !!k.wasActiveInCurrentTurn,
-      })),
+      tiles: gs.tiles.map(
+        (t) =>
+          ({
+            pos: { x: t.pos.x, y: t.pos.y },
+            player: t.player,
+            content: Content.copy(t.content),
+            kingdom: t.kingdom,
+          }) as Tile,
+      ),
+      kingdoms: gs.kingdoms.map(
+        (k) =>
+          ({
+            id: k.id,
+            player: k.player,
+            savings: k.savings,
+            tiles: k.tiles.slice(),
+            doneMoving: !!k.doneMoving,
+            wasActiveInCurrentTurn: !!k.wasActiveInCurrentTurn,
+          }) as Kingdom,
+      ),
       activeKingdom: gs.activeKingdom,
       heldObject: Content.copy(gs.heldObject),
       botIntelligence: gs.botIntelligence,
@@ -495,11 +663,11 @@ const GameStateHelper = {
 
   // Serialized (compact-ish) form for chat; same as copy but without derived.
   // copy() already returns a clean object, so this is just an alias.
-  serialize(gs) {
+  serialize(gs: GameState): GameStateData {
     return GameStateHelper.copy(gs);
   },
 
-  fromSerialized(obj) {
+  fromSerialized(obj: unknown): GameState {
     const gs = JSON.parse(JSON.stringify(obj));
     for (const p of gs.players)
       if (p.roundOfDefeat == null) p.roundOfDefeat = null;
@@ -507,15 +675,24 @@ const GameStateHelper = {
   },
 
   // ---------- map generation ----------
-  initializeMap(gs, players, landMass, density, vegetationDensity, mapSeed) {
+  initializeMap(
+    gs: GameState,
+    players: GamePlayer[],
+    landMass: number,
+    density: DensityName | number,
+    vegetationDensity: number | null,
+    mapSeed?: number | string | null,
+  ): void {
     if (mapSeed == null) mapSeed = Date.now();
     if (vegetationDensity == null)
       vegetationDensity = DEAFULT_INITIAL_TREE_DENSITY;
     // the UI stores the density by name (LOOSE/MEDIUM/DENSE); the generator
     // needs the numeric value like the original Densities enum
-    if (typeof density === "string" && DENSITIES[density] != null)
-      density = DENSITIES[density];
-    gs.density = density;
+    const densityValue =
+      typeof density === "string" && DENSITIES[density] != null
+        ? DENSITIES[density]
+        : (density as number);
+    gs.density = densityValue;
     gs.seed = mapSeed;
     gs.players = players;
     gs.tiles = [];
@@ -534,14 +711,21 @@ const GameStateHelper = {
       gs,
       players,
       landMass,
-      density,
+      densityValue,
       vegetationDensity,
       random,
     );
     GameStateHelper.prepare(gs);
   },
 
-  generateMap(gs, players, landMass, density, vegetationDensity, random) {
+  generateMap(
+    gs: GameState,
+    players: GamePlayer[],
+    landMass: number,
+    density: number,
+    vegetationDensity: number,
+    random: RandomInstance,
+  ): void {
     // the original retries until every player has at least one kingdom; the
     // RNG keeps advancing, so this terminates in practice
     let attempts = 0;
@@ -560,13 +744,13 @@ const GameStateHelper = {
     GameStateHelper.prepare(gs);
   },
 
-  doesEveryPlayerHaveKingdom(gs) {
+  doesEveryPlayerHaveKingdom(gs: GameState): boolean {
     const playersWithoutKingdoms = new Set(gs.players.map((p) => p.index));
     for (const k of gs.kingdoms) playersWithoutKingdoms.delete(k.player);
     return playersWithoutKingdoms.size === 0;
   },
 
-  sortPlayersByIncome(gs) {
+  sortPlayersByIncome(gs: GameState): void {
     // Java sorts players by total income, stable. Player identity is by index,
     // so reordering just reorders the turn order; keep indices intact.
     const before = gs.playerTurn;
@@ -578,7 +762,7 @@ const GameStateHelper = {
     gs.playerTurn = before;
   },
 
-  getPlayerIncome(gs, playerIndex) {
+  getPlayerIncome(gs: GameState, playerIndex: number): number {
     let sum = 0;
     for (const k of gs.kingdoms)
       if (k.player === playerIndex)
@@ -592,8 +776,14 @@ const GameStateHelper = {
   // position, and the next position is chosen among the unused neighbours,
   // weighted by pow(unusedNeighboursOfCandidate, density). If a position has no
   // free neighbours the walk backtracks through the position history.
-  generateTiles(gs, players, landMass, density, random) {
-    const key = (c) => c.x + "," + c.y;
+  generateTiles(
+    gs: GameState,
+    players: GamePlayer[],
+    landMass: number,
+    density: number,
+    random: RandomInstance,
+  ): void {
+    const key = (c: HexCoords) => c.x + "," + c.y;
     // distribute the land mass evenly to all players, leftover tiles to random players
     if (typeof density !== "number" || !isFinite(density)) {
       throw new Error(
@@ -692,7 +882,10 @@ const GameStateHelper = {
   },
 
   // Port of HexMapHelper.getUnusedNeighborCoords
-  unusedNeighborCoords(tileMap, coords) {
+  unusedNeighborCoords(
+    tileMap: Map<string, Tile>,
+    coords: HexCoords,
+  ): HexCoords[] {
     const result = [];
     for (const n of HexMapHelper.getNeighborCoords(coords)) {
       if (!tileMap.has(n.x + "," + n.y)) result.push(n);
@@ -700,7 +893,7 @@ const GameStateHelper = {
     return result;
   },
 
-  createInitialKingdoms(gs) {
+  createInitialKingdoms(gs: GameState): void {
     gs.kingdoms = [];
     gs.kingdomById = new Map();
     if (gs.nextKingdomId == null) gs.nextKingdomId = 1;
@@ -708,19 +901,19 @@ const GameStateHelper = {
       for (const nt of HexMapHelper.getNeighborTiles(gs, tile)) {
         if (nt == null || nt.player !== tile.player) continue;
         if (tile.kingdom == null && nt.kingdom == null) {
-          const nk = GameStateHelper.newKingdom(gs, tile.player);
+          const nk = GameStateHelper.newKingdom(gs, tile.player as number);
           nk.tiles.push(tile.idx, nt.idx);
           nk.tileSet.add(tile.idx);
           nk.tileSet.add(nt.idx);
           tile.kingdom = nk.id;
           nt.kingdom = nk.id;
         } else if (tile.kingdom != null && nt.kingdom == null) {
-          const k = gs.kingdomById.get(tile.kingdom);
+          const k = GameStateHelper.kingdomById(gs, tile.kingdom);
           k.tiles.push(nt.idx);
           k.tileSet.add(nt.idx);
           nt.kingdom = tile.kingdom;
         } else if (tile.kingdom == null && nt.kingdom != null) {
-          const k = gs.kingdomById.get(nt.kingdom);
+          const k = GameStateHelper.kingdomById(gs, nt.kingdom);
           k.tiles.push(tile.idx);
           k.tileSet.add(tile.idx);
           tile.kingdom = nt.kingdom;
@@ -730,7 +923,7 @@ const GameStateHelper = {
           tile.kingdom !== nt.kingdom
         ) {
           // merge nt kingdom into tile kingdom
-          const master = gs.kingdomById.get(tile.kingdom);
+          const master = GameStateHelper.kingdomById(gs, tile.kingdom);
           const slave = gs.kingdomById.get(nt.kingdom);
           if (!slave || master === slave) continue;
           for (const ti of slave.tiles) {
@@ -747,13 +940,13 @@ const GameStateHelper = {
     GameStateHelper.prepare(gs);
   },
 
-  newKingdom(gs, player) {
-    const k = {
+  newKingdom(gs: GameState, player: number): Kingdom {
+    const k: Kingdom = {
       id: gs.nextKingdomId++,
       player,
       savings: 0,
       tiles: [],
-      tileSet: new Set(),
+      tileSet: new Set<number>(),
       doneMoving: false,
       wasActiveInCurrentTurn: false,
     };
@@ -762,7 +955,7 @@ const GameStateHelper = {
     return k;
   },
 
-  dropKingdom(gs, kingdom) {
+  dropKingdom(gs: GameState, kingdom: Kingdom): void {
     const i = gs.kingdoms.indexOf(kingdom);
     if (i >= 0) gs.kingdoms.splice(i, 1);
     gs.kingdomById.delete(kingdom.id);
@@ -781,31 +974,35 @@ const GameStateHelper = {
     }
   },
 
-  createCapitals(gs) {
+  createCapitals(gs: GameState): void {
     for (const k of gs.kingdoms.slice()) GameStateHelper.createCapital(gs, k);
   },
 
-  createMoney(gs) {
+  createMoney(gs: GameState): void {
     for (const k of gs.kingdoms) k.savings = Math.min(k.tiles.length * 5, 20);
   },
 
-  createTrees(gs, vegetationDensity, random) {
+  createTrees(
+    gs: GameState,
+    vegetationDensity: number,
+    random: RandomInstance,
+  ): void {
     for (const tile of gs.tiles) {
       if (random.nextFloat() <= vegetationDensity)
         GameStateHelper.spawnTree(gs, tile);
     }
   },
 
-  spawnTree(gs, tile) {
+  spawnTree(gs: GameState, tile: Tile): void {
     if (GameStateHelper.isCoastTile(gs, tile)) tile.content = Content.palm();
     else tile.content = Content.tree();
   },
 
-  isCoastTile(gs, tile) {
+  isCoastTile(gs: GameState, tile: Tile): boolean {
     return HexMapHelper.getNeighborTiles(gs, tile).some((n) => n == null);
   },
 
-  createCapital(gs, kingdom) {
+  createCapital(gs: GameState, kingdom: Kingdom): void {
     let empty = null;
     for (const ti of kingdom.tiles) {
       const tile = gs.tiles[ti];
@@ -819,7 +1016,11 @@ const GameStateHelper = {
     newCapitalTile.content = Content.capital();
   },
 
-  createCapitalAfterDestruction(gs, oldCapitalTile, oldKingdom) {
+  createCapitalAfterDestruction(
+    gs: GameState,
+    oldCapitalTile: Tile,
+    oldKingdom: Kingdom,
+  ): void {
     const neighbors = HexMapHelper.getNeighborTiles(gs, oldCapitalTile);
     let candidate = null;
     for (const nt of neighbors) {
@@ -875,7 +1076,12 @@ const GameStateHelper = {
     candidate.content = Content.capital();
   },
 
-  isCapitalCandidateDisconnected(gs, oldCapitalTile, oldKingdom, candidate) {
+  isCapitalCandidateDisconnected(
+    gs: GameState,
+    oldCapitalTile: Tile,
+    oldKingdom: Kingdom,
+    candidate: Tile,
+  ): boolean {
     return !HexMapHelper.getNeighborTiles(gs, candidate).some(
       (nn) =>
         nn != null && nn !== oldCapitalTile && nn.kingdom === oldKingdom.id,
@@ -883,7 +1089,7 @@ const GameStateHelper = {
   },
 
   // ---------- income / salaries ----------
-  getKingdomIncome(gs, kingdom) {
+  getKingdomIncome(gs: GameState, kingdom: Kingdom): number {
     let trees = 0;
     for (const ti of kingdom.tiles) {
       const c = gs.tiles[ti].content;
@@ -892,7 +1098,7 @@ const GameStateHelper = {
     return kingdom.tiles.length - trees;
   },
 
-  getKingdomSalaries(gs, kingdom) {
+  getKingdomSalaries(gs: GameState, kingdom: Kingdom): number {
     let result = 0;
     for (const ti of kingdom.tiles) {
       const c = gs.tiles[ti].content;
@@ -908,7 +1114,7 @@ const GameStateHelper = {
     return result;
   },
 
-  getProtectionLevel(gs, tile) {
+  getProtectionLevel(gs: GameState, tile: Tile): number {
     let level = 0;
     if (tile.content != null) level = Content.strength(tile.content);
     for (const neighbor of HexMapHelper.getNeighborTiles(gs, tile)) {
@@ -927,23 +1133,23 @@ const GameStateHelper = {
   },
 
   // ---------- basic mutations ----------
-  activateKingdom(gs, kingdom) {
+  activateKingdom(gs: GameState, kingdom: Kingdom | null): void {
     if (kingdom == null) return;
     kingdom.wasActiveInCurrentTurn = true;
     gs.activeKingdom = kingdom.id;
   },
 
-  pickupObject(gs, tile) {
+  pickupObject(gs: GameState, tile: Tile): void {
     gs.heldObject = tile.content;
     tile.content = null;
   },
 
-  placeObject(gs, tile) {
+  placeObject(gs: GameState, tile: Tile): void {
     tile.content = gs.heldObject;
     gs.heldObject = null;
   },
 
-  placeOwn(gs, tile) {
+  placeOwn(gs: GameState, tile: Tile): void {
     if (tile.content != null && Content.isBlocking(tile.content)) {
       // units can't act after removing blocking stuff
       if (gs.heldObject != null && gs.heldObject.k === "unit")
@@ -952,13 +1158,13 @@ const GameStateHelper = {
     GameStateHelper.placeObject(gs, tile);
   },
 
-  combineUnits(gs, tile) {
+  combineUnits(gs: GameState, tile: Tile): void {
     const heldUnit = gs.heldObject;
     const tileUnit = tile.content;
+    if (heldUnit == null || heldUnit.k !== "unit") return;
+    if (tileUnit == null || tileUnit.k !== "unit") return;
     const newStrength = unitStrength(heldUnit) + unitStrength(tileUnit);
-    const newType = UNIT_BY_STRENGTH[newStrength];
-    // Combining is only legal up to strength 4; guard so an invalid move can
-    // never crash the game state machine (validation normally rejects it).
+    const newType = UNIT_BY_STRENGTH[newStrength as UnitStrength];
     if (newType == null) return;
     const newUnit = Content.unit(newType);
     newUnit.canAct = tileUnit.canAct;
@@ -966,35 +1172,35 @@ const GameStateHelper = {
     GameStateHelper.placeObject(gs, tile);
   },
 
-  conquer(gs, tile) {
-    gs.heldObject.canAct = false;
+  conquer(gs: GameState, tile: Tile): void {
+    if (gs.heldObject == null) return;
+    if (gs.heldObject.k === "unit") gs.heldObject.canAct = false;
     GameStateHelper.removeTileFromItsKingdom(gs, tile);
-    const activeKingdom = gs.kingdomById.get(gs.activeKingdom);
+    const activeKingdom = GameStateHelper.kingdomById(gs, gs.activeKingdom);
     GameStateHelper.addTileToKingdom(gs, activeKingdom, tile);
     tile.player = activeKingdom.player;
     GameStateHelper.mergeConnectedKingdoms(gs, tile);
     GameStateHelper.placeObject(gs, tile);
   },
 
-  buyPeasant(gs) {
-    const k = gs.kingdomById.get(gs.activeKingdom);
+  buyPeasant(gs: GameState): void {
+    const k = GameStateHelper.kingdomById(gs, gs.activeKingdom);
     k.savings -= 10;
-    if (gs.heldObject == null) {
+    if (gs.heldObject == null || gs.heldObject.k !== "unit") {
       gs.heldObject = Content.unit(UNITS.PEASANT);
     } else {
-      gs.heldObject = Content.unit(
-        UNIT_BY_STRENGTH[unitStrength(gs.heldObject) + 1],
-      );
+      const next = unitStrength(gs.heldObject) + 1;
+      gs.heldObject = Content.unit(UNIT_BY_STRENGTH[next as UnitStrength]);
     }
   },
 
-  buyTower(gs) {
-    const k = gs.kingdomById.get(gs.activeKingdom);
+  buyTower(gs: GameState): void {
+    const k = GameStateHelper.kingdomById(gs, gs.activeKingdom);
     k.savings -= TOWER_COST;
     gs.heldObject = Content.tower();
   },
 
-  removeTileFromItsKingdom(gs, tile) {
+  removeTileFromItsKingdom(gs: GameState, tile: Tile): void {
     const kingdom = GameStateHelper.removeTileFromKingdomStruct(gs, tile);
     if (kingdom == null) return;
 
@@ -1018,6 +1224,7 @@ const GameStateHelper = {
         const neighborKingdom = gs.kingdomById.get(neighborTile.kingdom);
         if (
           neighborTile.player === tile.player &&
+          neighborKingdom != null &&
           neighborKingdom !== kingdom
         ) {
           GameStateHelper.combineKingdoms(gs, kingdom, neighborKingdom);
@@ -1036,17 +1243,16 @@ const GameStateHelper = {
       oldKingdomNeighborTiles,
     );
     if (potentiallySplit || kingdom.tiles.length < 2) {
-      GameStateHelper.updateSplitKingdom(
-        gs,
-        kingdom.tiles.slice(),
-        kingdom.id,
-        tile,
-      );
+      GameStateHelper.updateSplitKingdom(gs, kingdom.tiles.slice(), kingdom.id);
     }
   },
 
-  wasKingdomPotentiallySplit(gs, tile, oldKingdomNeighborTiles) {
-    const neighborOf = (t) => HexMapHelper.getNeighborTiles(gs, t);
+  wasKingdomPotentiallySplit(
+    gs: GameState,
+    tile: Tile,
+    oldKingdomNeighborTiles: Tile[],
+  ): boolean {
+    const neighborOf = (t: Tile) => HexMapHelper.getNeighborTiles(gs, t);
     switch (oldKingdomNeighborTiles.length) {
       case 2:
         return !neighborOf(oldKingdomNeighborTiles[0]).includes(
@@ -1065,7 +1271,10 @@ const GameStateHelper = {
         const notOld = HexMapHelper.getNeighborTiles(gs, tile).filter(
           (t) => t != null && !oldKingdomNeighborTiles.includes(t),
         );
-        if (notOld.length >= 2 && neighborOf(notOld[0]).includes(notOld[1]))
+        if (
+          notOld.length >= 2 &&
+          neighborOf(notOld[0] as Tile).includes(notOld[1] as Tile)
+        )
           return false;
         return true;
       }
@@ -1074,7 +1283,11 @@ const GameStateHelper = {
     }
   },
 
-  combineKingdoms(gs, masterKingdom, slaveKingdom) {
+  combineKingdoms(
+    gs: GameState,
+    masterKingdom: Kingdom,
+    slaveKingdom: Kingdom,
+  ): void {
     if (
       masterKingdom == null ||
       slaveKingdom == null ||
@@ -1098,8 +1311,12 @@ const GameStateHelper = {
   },
 
   // The Java recursive updateSplitKingdom, adapted to work with kingdom ids.
-  // `remainingTiles` = tile indices that (still) belong to the old kingdom.
-  updateSplitKingdom(gs, remainingTiles, oldKingdomId, depth = 0) {
+  updateSplitKingdom(
+    gs: GameState,
+    remainingTiles: number[],
+    oldKingdomId: number,
+    depth = 0,
+  ): void {
     if (remainingTiles.length === 0) return;
     if (depth > 1000) throw new Error("updateSplitKingdom recursion too deep");
     const oldKingdom = gs.kingdomById.get(oldKingdomId) || null;
@@ -1116,15 +1333,15 @@ const GameStateHelper = {
 
     const remainingSet = new Set(remainingTiles);
     let startTile;
-    let newKingdom;
+    let newKingdom: Kingdom;
     if (capitalTile != null) {
       // capital exists --> the capital keeps the old kingdom (its identity)
       startTile = capitalTile;
-      newKingdom = oldKingdom;
+      newKingdom = oldKingdom as Kingdom;
     } else {
       // no capital exists --> create a new kingdom starting from one tile
-      startTile = gs.tiles[remainingTiles[0]];
-      newKingdom = GameStateHelper.newKingdom(gs, startTile.player);
+      startTile = gs.tiles[remainingTiles[0]] as Tile;
+      newKingdom = GameStateHelper.newKingdom(gs, startTile.player as number);
     }
 
     // expand outwards from startTile to find connected tiles
@@ -1132,7 +1349,7 @@ const GameStateHelper = {
     const todo = [startTile];
     const done = new Set([startTile.idx]);
     while (todo.length > 0) {
-      const cur = todo.shift();
+      const cur = todo.shift() as Tile;
       claimed.add(cur.idx);
       for (const exp of HexMapHelper.getNeighborTiles(gs, cur)) {
         if (
@@ -1153,7 +1370,6 @@ const GameStateHelper = {
       oldKingdom.tiles = oldKingdom.tiles.filter((ti) => !claimed.has(ti));
       oldKingdom.tileSet = new Set(oldKingdom.tiles);
     }
-    // (re)build the new kingdom's list from scratch in that case too
     newKingdom.tiles = [];
     newKingdom.tileSet = new Set();
     for (const ti of remainingTiles) {
@@ -1161,10 +1377,9 @@ const GameStateHelper = {
         GameStateHelper.addTileToKingdom(gs, newKingdom, gs.tiles[ti]);
     }
 
-    const leftover = remainingTiles.filter((ti) => !claimed.has(ti));
+    const leftover = remainingTiles.filter((ti: number) => !claimed.has(ti));
 
     if (newKingdom.tiles.length < 2) {
-      // dissolve single-tile kingdoms
       for (const ti of newKingdom.tiles.slice()) {
         const tile = gs.tiles[ti];
         if (tile.content != null) {
@@ -1190,12 +1405,13 @@ const GameStateHelper = {
     }
   },
 
-  removeKingdom(gs, kingdom) {
+  removeKingdom(gs: GameState, kingdom: Kingdom): void {
     GameStateHelper.dropKingdom(gs, kingdom);
   },
 
-  mergeConnectedKingdoms(gs, tile) {
-    const kingdom = gs.kingdomById.get(tile.kingdom);
+  mergeConnectedKingdoms(gs: GameState, tile: Tile): void {
+    const kingdom =
+      tile.kingdom == null ? null : gs.kingdomById.get(tile.kingdom);
     if (!kingdom) return;
     for (const neighborTile of HexMapHelper.getNeighborTiles(gs, tile)) {
       if (neighborTile == null || neighborTile.player !== tile.player) continue;
@@ -1215,7 +1431,7 @@ const GameStateHelper = {
   },
 
   // ---------- tree spreading ----------
-  getTilesOakTreesWillSpreadTo(gs) {
+  getTilesOakTreesWillSpreadTo(gs: GameState): Tile[] {
     const blackList = new Set();
     const result = [];
     for (const tile of gs.tiles) {
@@ -1252,7 +1468,7 @@ const GameStateHelper = {
     return result;
   },
 
-  getTilesPalmTreesWillSpreadTo(gs) {
+  getTilesPalmTreesWillSpreadTo(gs: GameState): Tile[] {
     const blackList = new Set();
     const result = [];
     for (const tile of gs.tiles) {
@@ -1265,9 +1481,9 @@ const GameStateHelper = {
             neighbor.content == null &&
             GameStateHelper.isCoastTile(gs, neighbor),
         );
-        candidates.sort(HexMapHelper.compareTiles);
+        (candidates as Tile[]).sort(HexMapHelper.compareTiles);
         if (candidates.length > 0) {
-          const newTreeTile = candidates[0];
+          const newTreeTile = candidates[0] as Tile;
           result.push(newTreeTile);
           blackList.add(newTreeTile.idx);
         }
@@ -1276,14 +1492,14 @@ const GameStateHelper = {
     return result;
   },
 
-  spreadTrees(gs) {
+  spreadTrees(gs: GameState): void {
     const targets = GameStateHelper.getTilesOakTreesWillSpreadTo(gs).concat(
       GameStateHelper.getTilesPalmTreesWillSpreadTo(gs),
     );
     for (const tile of targets) GameStateHelper.spawnTree(gs, tile);
   },
 
-  progressBlockingObjects(gs, player) {
+  progressBlockingObjects(gs: GameState, player: GamePlayer): void {
     for (const tile of gs.tiles) {
       if (tile.player === player.index && tile.content != null) {
         if (tile.content.k === "gravestone") {
@@ -1296,7 +1512,7 @@ const GameStateHelper = {
   },
 
   // ---------- forgotten kingdom heuristic ----------
-  getFirstForgottenKingdom(gs) {
+  getFirstForgottenKingdom(gs: GameState): Kingdom | null {
     for (let ki = 0; ki < gs.kingdoms.length; ki++) {
       const kingdom = gs.kingdoms[ki];
       if (
@@ -1343,13 +1559,13 @@ const GameStateHelper = {
   },
 
   wasKingdomPotentiallyForgotten(
-    gs,
-    kingdom,
-    canAffordTower,
-    hasEmptyTile,
-    hasTree,
-    sumStrength,
-  ) {
+    gs: GameState,
+    kingdom: Kingdom,
+    canAffordTower: boolean,
+    hasEmptyTile: boolean,
+    hasTree: boolean,
+    sumStrength: number,
+  ): boolean {
     if (canAffordTower && hasEmptyTile) return true;
     if (sumStrength > 0) {
       if (hasTree) return true;
@@ -1369,7 +1585,7 @@ const GameStateHelper = {
   },
 
   // ---------- turn handling ----------
-  endTurn(gs) {
+  endTurn(gs: GameState): GameState {
     // win condition
     let noOfKingdomTiles = 0;
     for (const k of gs.kingdoms) noOfKingdomTiles += k.tiles.length;
@@ -1429,7 +1645,7 @@ const GameStateHelper = {
   },
 
   // ---------- moves ----------
-  applyPlayerMove(gs, move) {
+  applyPlayerMove(gs: GameState, move: PlayerMove | null): GameState | void {
     if (!move || typeof move.type !== "string") return gs;
     const tile = move.pos ? GameStateHelper.tileAt(gs, move.pos) : null;
     switch (move.type) {
@@ -1461,7 +1677,10 @@ const GameStateHelper = {
         break;
       case "ACTIVATE_KINGDOM":
         if (tile && tile.kingdom != null && gs.kingdomById.has(tile.kingdom))
-          GameStateHelper.activateKingdom(gs, gs.kingdomById.get(tile.kingdom));
+          GameStateHelper.activateKingdom(
+            gs,
+            gs.kingdomById.get(tile.kingdom) as Kingdom,
+          );
         break;
       default:
         throw new Error("Unexpected player move type " + move.type);
@@ -1473,15 +1692,19 @@ const GameStateHelper = {
 // InputValidationHelper port (static rule checks)
 // ---------------------------------------------------------------------------
 const InputValidationHelper = {
-  isWater(tile) {
+  isWater(tile: Tile | null): tile is null {
     return tile == null;
   },
 
-  isCorrectPlayersTurn(gs, actingPlayerIndex) {
+  isCorrectPlayersTurn(gs: GameState, actingPlayerIndex: number): boolean {
     return gs.players[gs.playerTurn].index === actingPlayerIndex;
   },
 
-  checkChangeActiveKingdom(gs, playerIndex, tile) {
+  checkChangeActiveKingdom(
+    gs: GameState,
+    playerIndex: number,
+    tile: Tile | null,
+  ): boolean {
     if (!InputValidationHelper.isCorrectPlayersTurn(gs, playerIndex))
       return false;
     if (InputValidationHelper.isWater(tile)) return false;
@@ -1491,7 +1714,11 @@ const InputValidationHelper = {
     return gs.activeKingdom !== tile.kingdom;
   },
 
-  checkPickupObject(gs, playerIndex, tile) {
+  checkPickupObject(
+    gs: GameState,
+    playerIndex: number,
+    tile: Tile | null,
+  ): boolean {
     if (!InputValidationHelper.isCorrectPlayersTurn(gs, playerIndex))
       return false;
     if (InputValidationHelper.isWater(tile)) return false;
@@ -1503,7 +1730,11 @@ const InputValidationHelper = {
     return tile.content.canAct;
   },
 
-  checkPlaceOwn(gs, playerIndex, tile) {
+  checkPlaceOwn(
+    gs: GameState,
+    playerIndex: number,
+    tile: Tile | null,
+  ): boolean {
     if (!InputValidationHelper.isCorrectPlayersTurn(gs, playerIndex))
       return false;
     if (InputValidationHelper.isWater(tile)) return false;
@@ -1519,7 +1750,11 @@ const InputValidationHelper = {
     return tile.content == null || Content.isBlocking(tile.content);
   },
 
-  checkBuyAndPlaceUnitInstantly(gs, playerIndex, tile) {
+  checkBuyAndPlaceUnitInstantly(
+    gs: GameState,
+    playerIndex: number,
+    tile: Tile | null,
+  ): boolean {
     if (!InputValidationHelper.isCorrectPlayersTurn(gs, playerIndex))
       return false;
     if (!InputValidationHelper.checkBuyObject(gs, playerIndex, "unit"))
@@ -1531,11 +1766,17 @@ const InputValidationHelper = {
     return tile.content == null || Content.isBlocking(tile.content);
   },
 
-  checkBuyAndPlaceTowerInstantly(gs, playerIndex, tile) {
+  checkBuyAndPlaceTowerInstantly(
+    gs: GameState,
+    playerIndex: number,
+    tile: Tile | null,
+  ): boolean {
     if (!InputValidationHelper.isCorrectPlayersTurn(gs, playerIndex))
       return false;
     const activeKingdom =
-      gs.activeKingdom != null ? gs.kingdomById.get(gs.activeKingdom) : null;
+      gs.activeKingdom != null
+        ? GameStateHelper.kingdomById(gs, gs.activeKingdom)
+        : null;
     if (activeKingdom == null) return false;
     if (activeKingdom.savings < TOWER_COST) return false;
     if (gs.heldObject != null) return false;
@@ -1545,7 +1786,11 @@ const InputValidationHelper = {
     return tile.content == null;
   },
 
-  checkCombineUnits(gs, playerIndex, tile) {
+  checkCombineUnits(
+    gs: GameState,
+    playerIndex: number,
+    tile: Tile | null,
+  ): boolean {
     if (!InputValidationHelper.isCorrectPlayersTurn(gs, playerIndex))
       return false;
     if (InputValidationHelper.isWater(tile)) return false;
@@ -1557,7 +1802,7 @@ const InputValidationHelper = {
     return sum <= 4;
   },
 
-  checkConquer(gs, playerIndex, tile) {
+  checkConquer(gs: GameState, playerIndex: number, tile: Tile | null): boolean {
     if (!InputValidationHelper.isCorrectPlayersTurn(gs, playerIndex))
       return false;
     if (InputValidationHelper.isWater(tile)) return false;
@@ -1590,17 +1835,23 @@ const InputValidationHelper = {
     return nextToOwnKingdom;
   },
 
-  checkEndTurn(gs, playerIndex) {
+  checkEndTurn(gs: GameState, playerIndex: number): boolean {
     if (!InputValidationHelper.isCorrectPlayersTurn(gs, playerIndex))
       return false;
     return gs.heldObject == null;
   },
 
-  checkBuyObject(gs, playerIndex, targetKind) {
+  checkBuyObject(
+    gs: GameState,
+    playerIndex: number,
+    targetKind: ContentKind,
+  ): boolean {
     if (!InputValidationHelper.isCorrectPlayersTurn(gs, playerIndex))
       return false;
     const activeKingdom =
-      gs.activeKingdom != null ? gs.kingdomById.get(gs.activeKingdom) : null;
+      gs.activeKingdom != null
+        ? GameStateHelper.kingdomById(gs, gs.activeKingdom)
+        : null;
     if (activeKingdom == null) return false;
     const cost = targetKind === "unit" ? 10 : TOWER_COST;
     if (activeKingdom.savings < cost) return false;
@@ -1612,13 +1863,22 @@ const InputValidationHelper = {
     );
   },
 
-  checkUndoAction(gs, playerIndex, isUndoPossible) {
+  checkUndoAction(
+    gs: GameState,
+    playerIndex: number,
+    isUndoPossible: boolean,
+  ): boolean {
     if (!InputValidationHelper.isCorrectPlayersTurn(gs, playerIndex))
       return false;
     return isUndoPossible;
   },
 
-  checkPlayerMove(gs, playerIndex, move, isUndoPossible) {
+  checkPlayerMove(
+    gs: GameState,
+    playerIndex: number,
+    move: PlayerMove,
+    isUndoPossible: boolean,
+  ): boolean {
     const tile = move.pos ? GameStateHelper.tileAt(gs, move.pos) : null;
     switch (move.type) {
       case "PICK_UP":

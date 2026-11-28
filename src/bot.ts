@@ -13,29 +13,46 @@ import {
   unitStrength,
   GameStateHelper,
   InputValidationHelper,
-} from "./core.js";
+} from "./core";
+import type {
+  GameState,
+  Kingdom,
+  Tile,
+  UnitStrength,
+  UnitTypeInfo,
+  Intelligence,
+  RandomInstance,
+  ContentType,
+} from "./core";
+
+interface ScoreInfo {
+  tile: Tile | null;
+  score: number;
+  requiredStrength?: UnitStrength;
+}
 
 class PickedUpUnits {
+  counts: Record<UnitStrength, number>;
   constructor() {
     this.counts = { 1: 0, 2: 0, 3: 0, 4: 0 };
   }
-  ofStrength(s) {
+  ofStrength(s: UnitStrength): number {
     return this.counts[s];
   }
-  addStrength(s) {
+  addStrength(s: UnitStrength): void {
     this.counts[s]++;
   }
-  removeStrength(s, amount = 1) {
+  removeStrength(s: UnitStrength, amount = 1): void {
     this.counts[s] -= amount;
   }
-  total() {
+  total(): number {
     return this.counts[1] + this.counts[2] + this.counts[3] + this.counts[4];
   }
 }
 
 const BotAi = {
   // Generator: performs the whole bot turn on gs. Yields between kingdoms.
-  *doTurn(gs, intelligence) {
+  *doTurn(gs: GameState, intelligence: Intelligence): Generator<void> {
     const random = new Random(BotAi.stateHash(gs));
     let next = BotAi.getNextKingdom(gs);
     while (next != null) {
@@ -51,9 +68,9 @@ const BotAi = {
 
   // Deterministic stand-in for GameState.hashCode(): based on turn, round,
   // player index and tile composition.
-  stateHash(gs) {
+  stateHash(gs: GameState): number {
     let h = 2166136261 >>> 0;
-    const mix = (v) => {
+    const mix = (v: number): void => {
       h ^= v & 0xffffffff;
       h = Math.imul(h, 16777619) >>> 0;
     };
@@ -63,7 +80,7 @@ const BotAi = {
     for (const t of gs.tiles) {
       mix(t.pos.x + 1000);
       mix(t.pos.y + 1000);
-      mix(t.player + 1);
+      mix(Number(t.player ?? 0) + 1);
       const c = t.content;
       mix(
         c == null
@@ -85,7 +102,7 @@ const BotAi = {
     return h >>> 0;
   },
 
-  getNextKingdom(gs) {
+  getNextKingdom(gs: GameState): Kingdom | null {
     const activeIndex = gs.players[gs.playerTurn].index;
     for (const kingdom of gs.kingdoms) {
       if (!kingdom.doneMoving && kingdom.player === activeIndex) return kingdom;
@@ -93,15 +110,22 @@ const BotAi = {
     return null;
   },
 
-  activeKingdomOf(gs) {
-    return gs.kingdomById.get(gs.activeKingdom);
+  activeKingdomOf(gs: GameState): Kingdom | undefined {
+    return gs.activeKingdom == null
+      ? undefined
+      : gs.kingdomById.get(gs.activeKingdom);
   },
 
-  doKingdomMove(gs, kingdom, intelligence, random) {
+  doKingdomMove(
+    gs: GameState,
+    kingdom: Kingdom,
+    intelligence: Intelligence,
+    random: RandomInstance,
+  ): void {
     gs.activeKingdom = kingdom.id;
     const pickedUpUnits = new PickedUpUnits();
     BotAi.pickUpAllAvailableUnits(gs, kingdom, pickedUpUnits);
-    const placedTowerTiles = new Set();
+    const placedTowerTiles = new Set<number>();
 
     BotAi.removeBlockingObjects(
       gs,
@@ -120,12 +144,12 @@ const BotAi = {
     if (intelligence.reconsidersWhichTilesToProtect) {
       BotAi.sellTowers(
         gs,
-        gs.kingdomById.get(gs.activeKingdom),
+        GameStateHelper.kingdomById(gs, gs.activeKingdom),
         placedTowerTiles,
       );
       BotAi.pickUpAllAvailableUnits(
         gs,
-        gs.kingdomById.get(gs.activeKingdom),
+        GameStateHelper.kingdomById(gs, gs.activeKingdom),
         pickedUpUnits,
       );
       BotAi.defendMostImportantTiles(
@@ -140,7 +164,11 @@ const BotAi = {
     BotAi.protectWithLeftoverUnits(gs, intelligence, pickedUpUnits);
   },
 
-  pickUpAllAvailableUnits(gs, kingdom, pickedUpUnits) {
+  pickUpAllAvailableUnits(
+    gs: GameState,
+    kingdom: Kingdom,
+    pickedUpUnits: PickedUpUnits,
+  ): void {
     for (const ti of kingdom.tiles.slice()) {
       const tile = gs.tiles[ti];
       if (
@@ -148,15 +176,21 @@ const BotAi = {
         tile.content.k === "unit" &&
         tile.content.canAct
       ) {
-        pickedUpUnits.addStrength(Content.strength(tile.content));
+        pickedUpUnits.addStrength(
+          Content.strength(tile.content) as UnitStrength,
+        );
         tile.content = null;
       }
     }
   },
 
-  removeBlockingObjects(gs, pickedUpUnits, minimumRemovalScoreTreshold) {
-    const tilesWithBlockingObjects = new Map();
-    for (const ti of gs.kingdomById.get(gs.activeKingdom).tiles) {
+  removeBlockingObjects(
+    gs: GameState,
+    pickedUpUnits: PickedUpUnits,
+    minimumRemovalScoreTreshold: number,
+  ): void {
+    const tilesWithBlockingObjects = new Map<number, Tile>();
+    for (const ti of GameStateHelper.kingdomById(gs, gs.activeKingdom).tiles) {
       const tile = gs.tiles[ti];
       if (tile.content != null && Content.isBlocking(tile.content))
         tilesWithBlockingObjects.set(tile.idx, tile);
@@ -169,15 +203,15 @@ const BotAi = {
         pickedUpUnits.ofStrength(1) >= 1 ||
         BotAi.acquireUnit(
           gs,
-          gs.kingdomById.get(gs.activeKingdom),
+          GameStateHelper.kingdomById(gs, gs.activeKingdom),
           pickedUpUnits,
           1,
         )
       ) {
         pickedUpUnits.removeStrength(1);
         gs.heldObject = Content.unit(UNITS.PEASANT);
-        GameStateHelper.placeOwn(gs, best.tile);
-        tilesWithBlockingObjects.delete(best.tile.idx);
+        GameStateHelper.placeOwn(gs, best.tile as Tile);
+        tilesWithBlockingObjects.delete((best.tile as Tile).idx);
         best = BotAi.getBestBlockingObjectRemovalScore(gs, [
           ...tilesWithBlockingObjects.values(),
         ]);
@@ -187,7 +221,12 @@ const BotAi = {
     }
   },
 
-  defendMostImportantTiles(gs, intelligence, pickedUpUnits, placedTowerTiles) {
+  defendMostImportantTiles(
+    gs: GameState,
+    intelligence: Intelligence,
+    pickedUpUnits: PickedUpUnits,
+    placedTowerTiles: Set<number>,
+  ): void {
     const interestingProtectionTiles = BotAi.getInterestingProtectionTiles(gs);
     let best = BotAi.getBestDefenseTileScore(
       gs,
@@ -203,12 +242,12 @@ const BotAi = {
         )
       ) {
         GameStateHelper.buyTower(gs);
-        GameStateHelper.placeOwn(gs, best.tile);
-        placedTowerTiles.add(best.tile.idx);
+        GameStateHelper.placeOwn(gs, best.tile as Tile);
+        placedTowerTiles.add((best.tile as Tile).idx);
       } else if (pickedUpUnits.ofStrength(1) > 0) {
         pickedUpUnits.removeStrength(1);
         gs.heldObject = Content.unit(UNITS.PEASANT);
-        GameStateHelper.placeOwn(gs, best.tile);
+        GameStateHelper.placeOwn(gs, best.tile as Tile);
       } else if (
         InputValidationHelper.checkBuyObject(
           gs,
@@ -217,7 +256,7 @@ const BotAi = {
         )
       ) {
         GameStateHelper.buyPeasant(gs);
-        GameStateHelper.placeOwn(gs, best.tile);
+        GameStateHelper.placeOwn(gs, best.tile as Tile);
       } else {
         break;
       }
@@ -232,14 +271,14 @@ const BotAi = {
         pickedUpUnits.ofStrength(1) > 0 ||
         BotAi.acquireUnit(
           gs,
-          gs.kingdomById.get(gs.activeKingdom),
+          GameStateHelper.kingdomById(gs, gs.activeKingdom),
           pickedUpUnits,
           1,
         )
       ) {
         pickedUpUnits.removeStrength(1);
         gs.heldObject = Content.unit(UNITS.PEASANT);
-        GameStateHelper.placeOwn(gs, best.tile);
+        GameStateHelper.placeOwn(gs, best.tile as Tile);
       } else {
         break;
       }
@@ -251,7 +290,11 @@ const BotAi = {
     }
   },
 
-  conquerAsMuchAsPossible(gs, intelligence, pickedUpUnits) {
+  conquerAsMuchAsPossible(
+    gs: GameState,
+    intelligence: Intelligence,
+    pickedUpUnits: PickedUpUnits,
+  ): void {
     let unableToConquerAnyMore = false;
     while (!unableToConquerAnyMore) {
       const possibleConquerTiles = BotAi.determineNeighboringEnemyTiles(gs);
@@ -262,23 +305,25 @@ const BotAi = {
       );
       scoreInfos.sort((o1, o2) => {
         let result = o2.score - o1.score;
-        if (result === 0) result = HexMapHelper.compareTiles(o1.tile, o2.tile);
+        if (result === 0)
+          result = HexMapHelper.compareTiles(o1.tile as Tile, o2.tile as Tile);
         return result;
       });
 
       let conquered = false;
       for (const info of scoreInfos) {
         if (pickedUpUnits.total() === 0) break;
-        for (let i = info.requiredStrength; i <= 4; i++) {
+        for (let i = info.requiredStrength as number; i <= 4; i++) {
+          const st = i as UnitStrength;
           if (
             BotAi.conquerTileWithStoredUnit(
               gs,
-              info.tile,
-              UNIT_BY_STRENGTH[i],
-              pickedUpUnits.ofStrength(i),
+              info.tile as Tile,
+              UNIT_BY_STRENGTH[st],
+              pickedUpUnits.ofStrength(st),
             )
           ) {
-            pickedUpUnits.removeStrength(i);
+            pickedUpUnits.removeStrength(st);
             conquered = true;
             break;
           }
@@ -290,13 +335,13 @@ const BotAi = {
       // buy or combine more units
       let minRequired = Infinity;
       for (const info of scoreInfos)
-        minRequired = Math.min(minRequired, info.requiredStrength);
+        minRequired = Math.min(minRequired, info.requiredStrength as number);
       if (
         !BotAi.acquireUnit(
           gs,
-          gs.kingdomById.get(gs.activeKingdom),
+          GameStateHelper.kingdomById(gs, gs.activeKingdom),
           pickedUpUnits,
-          minRequired,
+          minRequired as UnitStrength,
         )
       ) {
         unableToConquerAnyMore = true;
@@ -304,10 +349,10 @@ const BotAi = {
     }
   },
 
-  determineNeighboringEnemyTiles(gs) {
+  determineNeighboringEnemyTiles(gs: GameState): Tile[] {
     const result = [];
     const seen = new Set();
-    for (const ti of gs.kingdomById.get(gs.activeKingdom).tiles) {
+    for (const ti of GameStateHelper.kingdomById(gs, gs.activeKingdom).tiles) {
       const tile = gs.tiles[ti];
       for (const nt of HexMapHelper.getNeighborTiles(gs, tile)) {
         if (nt != null && nt.kingdom !== tile.kingdom && !seen.has(nt.idx)) {
@@ -319,7 +364,12 @@ const BotAi = {
     return result;
   },
 
-  acquireUnit(gs, kingdom, pickedUpUnits, strength) {
+  acquireUnit(
+    gs: GameState,
+    kingdom: Kingdom,
+    pickedUpUnits: PickedUpUnits,
+    strength: UnitStrength,
+  ): boolean {
     switch (strength) {
       case 1:
         return BotAi.acquirePeasant(gs, kingdom, pickedUpUnits);
@@ -334,7 +384,11 @@ const BotAi = {
     }
   },
 
-  acquirePeasant(gs, kingdom, pickedUpUnits) {
+  acquirePeasant(
+    gs: GameState,
+    kingdom: Kingdom,
+    pickedUpUnits: PickedUpUnits,
+  ): boolean {
     if (
       BotAi.canKingdomSustainNewUnit(gs, kingdom, pickedUpUnits, UNITS.PEASANT)
     ) {
@@ -344,7 +398,11 @@ const BotAi = {
     return false;
   },
 
-  acquireSpearman(gs, kingdom, pickedUpUnits) {
+  acquireSpearman(
+    gs: GameState,
+    kingdom: Kingdom,
+    pickedUpUnits: PickedUpUnits,
+  ): boolean {
     if (pickedUpUnits.ofStrength(1) >= 2) {
       pickedUpUnits.removeStrength(1, 2);
       pickedUpUnits.addStrength(2);
@@ -372,7 +430,11 @@ const BotAi = {
     return false;
   },
 
-  acquireKnight(gs, kingdom, pickedUpUnits) {
+  acquireKnight(
+    gs: GameState,
+    kingdom: Kingdom,
+    pickedUpUnits: PickedUpUnits,
+  ): boolean {
     if (pickedUpUnits.ofStrength(1) >= 1 && pickedUpUnits.ofStrength(2) >= 1) {
       pickedUpUnits.removeStrength(1);
       pickedUpUnits.removeStrength(2);
@@ -401,7 +463,11 @@ const BotAi = {
     return false;
   },
 
-  acquireBaron(gs, kingdom, pickedUpUnits) {
+  acquireBaron(
+    gs: GameState,
+    kingdom: Kingdom,
+    pickedUpUnits: PickedUpUnits,
+  ): boolean {
     if (pickedUpUnits.ofStrength(1) >= 1 && pickedUpUnits.ofStrength(3) >= 1) {
       pickedUpUnits.removeStrength(1);
       pickedUpUnits.removeStrength(3);
@@ -449,7 +515,12 @@ const BotAi = {
     return false;
   },
 
-  canKingdomSustainNewUnit(gs, kingdom, pickedUpUnits, unitType) {
+  canKingdomSustainNewUnit(
+    gs: GameState,
+    kingdom: Kingdom,
+    pickedUpUnits: PickedUpUnits,
+    unitType: UnitTypeInfo,
+  ): boolean {
     return (
       (GameStateHelper.getKingdomIncome(gs, kingdom) -
         BotAi.getActualKingdomSalaries(gs, kingdom, pickedUpUnits) -
@@ -460,12 +531,20 @@ const BotAi = {
     );
   },
 
-  buyUnitDirectly(kingdom, pickedUpUnits, unitType) {
+  buyUnitDirectly(
+    kingdom: Kingdom,
+    pickedUpUnits: PickedUpUnits,
+    unitType: UnitTypeInfo,
+  ): void {
     kingdom.savings -= 10 * unitType.strength;
     pickedUpUnits.addStrength(unitType.strength);
   },
 
-  protectWithLeftoverUnits(gs, intelligence, pickedUpUnits) {
+  protectWithLeftoverUnits(
+    gs: GameState,
+    intelligence: Intelligence,
+    pickedUpUnits: PickedUpUnits,
+  ): void {
     const interestingProtectionTiles = BotAi.getInterestingProtectionTiles(gs);
     let best = BotAi.getBestDefenseTileScore(
       gs,
@@ -475,10 +554,11 @@ const BotAi = {
     while (best.score >= 0) {
       if (pickedUpUnits.total() === 0) break;
       for (let s = 4; s >= 1; s--) {
-        if (pickedUpUnits.ofStrength(s) > 0) {
-          gs.heldObject = Content.unit(UNIT_BY_STRENGTH[s]);
-          GameStateHelper.placeOwn(gs, best.tile);
-          pickedUpUnits.removeStrength(s);
+        const st = s as UnitStrength;
+        if (pickedUpUnits.ofStrength(st) > 0) {
+          gs.heldObject = Content.unit(UNIT_BY_STRENGTH[st]);
+          GameStateHelper.placeOwn(gs, best.tile as Tile);
+          pickedUpUnits.removeStrength(st);
           break;
         }
       }
@@ -491,20 +571,25 @@ const BotAi = {
     BotAi.placeLeftOverUnitsSomeWhere(gs, pickedUpUnits);
   },
 
-  placeLeftOverUnitsSomeWhere(gs, pickedUpUnits) {
+  placeLeftOverUnitsSomeWhere(
+    gs: GameState,
+    pickedUpUnits: PickedUpUnits,
+  ): void {
     for (let s = 1; s <= 4; s++) {
-      for (let i = 0; i < pickedUpUnits.ofStrength(s); i++) {
+      const st = s as UnitStrength;
+      for (let i = 0; i < pickedUpUnits.ofStrength(st); i++) {
         const tile = BotAi.findEmptyOrTreeTileInActiveKingdom(gs);
         if (tile != null) {
-          gs.heldObject = Content.unit(UNIT_BY_STRENGTH[s]);
+          gs.heldObject = Content.unit(UNIT_BY_STRENGTH[st]);
           GameStateHelper.placeOwn(gs, tile);
         }
       }
     }
   },
 
-  findEmptyOrTreeTileInActiveKingdom(gs) {
-    const k = gs.kingdomById.get(gs.activeKingdom);
+  findEmptyOrTreeTileInActiveKingdom(gs: GameState): Tile | null {
+    const k =
+      gs.activeKingdom == null ? null : gs.kingdomById.get(gs.activeKingdom);
     if (!k) return null;
     for (const ti of k.tiles) {
       const tile = gs.tiles[ti];
@@ -513,7 +598,11 @@ const BotAi = {
     return null;
   },
 
-  sellTowers(gs, kingdom, placedTowerTiles) {
+  sellTowers(
+    gs: GameState,
+    kingdom: Kingdom | null,
+    placedTowerTiles: Set<number>,
+  ): void {
     if (!kingdom) return;
     for (const ti of placedTowerTiles) {
       const tile = gs.tiles[ti];
@@ -526,17 +615,23 @@ const BotAi = {
     }
   },
 
-  getActualKingdomSalaries(gs, kingdom, pickedUpUnits) {
+  getActualKingdomSalaries(
+    gs: GameState,
+    kingdom: Kingdom,
+    pickedUpUnits: PickedUpUnits,
+  ): number {
     let result = GameStateHelper.getKingdomSalaries(gs, kingdom);
-    for (let s = 1; s <= 4; s++)
-      result += pickedUpUnits.ofStrength(s) * UNIT_BY_STRENGTH[s].salary;
+    for (let s = 1; s <= 4; s++) {
+      const st = s as UnitStrength;
+      result += pickedUpUnits.ofStrength(st) * UNIT_BY_STRENGTH[st].salary;
+    }
     return result;
   },
 
-  getInterestingProtectionTiles(gs) {
-    const result = new Set();
+  getInterestingProtectionTiles(gs: GameState): Set<number> {
+    const result = new Set<number>();
     const active = gs.activeKingdom;
-    for (const ti of gs.kingdomById.get(active).tiles) {
+    for (const ti of GameStateHelper.kingdomById(gs, active).tiles) {
       const tile = gs.tiles[ti];
       for (const nn of HexMapHelper.getNeighborsNeighborTiles(gs, tile)) {
         if (nn != null && nn.kingdom !== active) {
@@ -548,8 +643,8 @@ const BotAi = {
     return result;
   },
 
-  getBestBlockingObjectRemovalScore(gs, tiles) {
-    let best = { tile: null, score: -1 };
+  getBestBlockingObjectRemovalScore(gs: GameState, tiles: Tile[]): ScoreInfo {
+    let best: ScoreInfo = { tile: null, score: -1 };
     for (const tile of tiles) {
       const score = BotAi.getBlockingObjectRemovalScore(gs, tile);
       if (
@@ -564,15 +659,15 @@ const BotAi = {
     return best;
   },
 
-  getBlockingObjectRemovalScore(gs, tile) {
-    const c = tile.content;
+  getBlockingObjectRemovalScore(gs: GameState, tile: Tile): number {
+    const c = tile.content as ContentType;
     if (c.k === "palm") return BotAi.getPalmTreeRemovalScore(gs, tile);
     if (c.k === "tree") return BotAi.getRegularTreeRemovalScore(gs, tile);
     if (c.k === "gravestone") return BotAi.getGraveStoneRemovalScore(gs, tile);
     throw new Error("unexpected content for removal score: " + c.k);
   },
 
-  getPalmTreeRemovalScore(gs, tile) {
+  getPalmTreeRemovalScore(gs: GameState, tile: Tile): number {
     for (const nt of HexMapHelper.getNeighborTiles(gs, tile)) {
       if (
         nt != null &&
@@ -585,7 +680,7 @@ const BotAi = {
     return 6;
   },
 
-  getRegularTreeRemovalScore(gs, tile) {
+  getRegularTreeRemovalScore(gs: GameState, tile: Tile): number {
     let hasPartnerTree = false;
     let hasSpaceToSpread = false;
     for (const nt of HexMapHelper.getNeighborTiles(gs, tile)) {
@@ -604,7 +699,7 @@ const BotAi = {
     return 3;
   },
 
-  getGraveStoneRemovalScore(gs, tile) {
+  getGraveStoneRemovalScore(gs: GameState, tile: Tile): number {
     const willBecomePalm = GameStateHelper.isCoastTile(gs, tile);
     let score = -2;
     score += willBecomePalm
@@ -613,8 +708,12 @@ const BotAi = {
     return score;
   },
 
-  getBestDefenseTileScore(gs, intelligence, interestingTiles) {
-    let best = { tile: null, score: -1 };
+  getBestDefenseTileScore(
+    gs: GameState,
+    intelligence: Intelligence,
+    interestingTiles: Set<number>,
+  ): ScoreInfo {
+    let best: ScoreInfo = { tile: null, score: -1 };
     for (const ti of interestingTiles) {
       const tile = gs.tiles[ti];
       const score = BotAi.getTileDefenseScore(gs, intelligence, tile);
@@ -630,7 +729,11 @@ const BotAi = {
     return best;
   },
 
-  getTileDefenseScore(gs, intelligence, tile) {
+  getTileDefenseScore(
+    gs: GameState,
+    intelligence: Intelligence,
+    tile: Tile,
+  ): number {
     if (tile.content != null) return -1;
     let tileIsBorder = false;
     let tileIsProtected = false;
@@ -670,9 +773,13 @@ const BotAi = {
     return score;
   },
 
-  getOffenseTileScoreInfo(gs, intelligence, tile) {
+  getOffenseTileScoreInfo(
+    gs: GameState,
+    intelligence: Intelligence,
+    tile: Tile,
+  ): ScoreInfo {
     let score;
-    let requiredStrength =
+    let requiredStrength: number =
       tile.content == null ? 1 : Content.strength(tile.content) + 1;
     const tileKingdom = tile.kingdom;
     if (tileKingdom == null) {
@@ -701,12 +808,17 @@ const BotAi = {
       }
     }
     if (!intelligence.smartAttacking) score = 0;
-    if (gs.players[tile.player].type === "BOT")
+    if (gs.players[tile.player as number].type === "BOT")
       score += intelligence.attackOtherBotsBias;
-    return { tile, score, requiredStrength };
+    return { tile, score, requiredStrength: requiredStrength as UnitStrength };
   },
 
-  conquerTileWithStoredUnit(gs, tile, unitType, nrAvailableUnits) {
+  conquerTileWithStoredUnit(
+    gs: GameState,
+    tile: Tile,
+    unitType: UnitTypeInfo,
+    nrAvailableUnits: number,
+  ): boolean {
     if (nrAvailableUnits > 0) {
       gs.heldObject = Content.unit(unitType);
       GameStateHelper.conquer(gs, tile);
