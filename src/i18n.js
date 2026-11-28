@@ -81,7 +81,6 @@ export const I18N = (() => {
       "chat.sharedChallenge":
         "{name} shared a challenge • difficulty {difficultyLower}, size {sizeLower}, {players} players, seed {seed}",
       "chat.sharedDaily": "{name} shared the challenge of the day ({date})",
-      "chat.joinDaily": "{name} joined the challenge of the day ({date})",
       "chat.mapDetails":
         "difficulty {difficultyLower}, size {sizeLower}, {players} players, seed {seed}",
       "chat.resultBeat": "{name} beat a challenge in round {round} • {map}",
@@ -131,6 +130,7 @@ export const I18N = (() => {
       "over.enemyMajority":
         "Your enemy conquered a majority of the territory in round {round}.",
       "over.allConquered": "All your kingdoms were conquered in round {round}.",
+      "over.shareMap": "Share this map",
       "over.newGame": "New game",
       "over.mainMenu": "Main menu",
       "list.intro":
@@ -260,8 +260,6 @@ export const I18N = (() => {
         "{name} hat eine Herausforderung geteilt • {difficulty} als Schwierigkeit, {size} als Größe, {players} Spieler, Seed {seed}",
       "chat.sharedDaily":
         "{name} hat die Herausforderung des Tages geteilt ({date})",
-      "chat.joinDaily":
-        "{name} ist der Herausforderung des Tages beigetreten ({date})",
       "chat.mapDetails":
         "{difficulty} als Schwierigkeit, {size} als Größe, {players} Spieler, Seed {seed}",
       "chat.resultBeat":
@@ -316,6 +314,7 @@ export const I18N = (() => {
         "Dein Gegner hat in Runde {round} die Mehrheit des Gebiets erobert.",
       "over.allConquered":
         "Alle deine Königreiche wurden in Runde {round} erobert.",
+      "over.shareMap": "Diese Karte teilen",
       "over.newGame": "Neues Spiel",
       "over.mainMenu": "Hauptmenü",
       "list.intro":
@@ -444,7 +443,6 @@ export const I18N = (() => {
       "chat.sharedChallenge":
         "{name} a partagé un défi • difficulté {difficultyLower}, taille {sizeLower}, {players} joueurs, graine {seed}",
       "chat.sharedDaily": "{name} a partagé le défi du jour ({date})",
-      "chat.joinDaily": "{name} a rejoint le défi du jour ({date})",
       "chat.mapDetails":
         "difficulté {difficultyLower}, taille {sizeLower}, {players} joueurs, graine {seed}",
       "chat.resultBeat": "{name} a gagné un défi à la manche {round} • {map}",
@@ -495,6 +493,7 @@ export const I18N = (() => {
         "Ton ennemi a conquis la majorité du territoire à la manche {round}.",
       "over.allConquered":
         "Tous tes royaumes ont été conquis à la manche {round}.",
+      "over.shareMap": "Partager cette carte",
       "over.newGame": "Nouvelle partie",
       "over.mainMenu": "Menu principal",
       "list.intro":
@@ -623,7 +622,6 @@ export const I18N = (() => {
       "chat.sharedChallenge":
         "{name} ha condiviso una sfida • difficoltà {difficultyLower}, dimensione {sizeLower}, {players} giocatori, seme {seed}",
       "chat.sharedDaily": "{name} ha condiviso la sfida del giorno ({date})",
-      "chat.joinDaily": "{name} è entrato nella sfida del giorno ({date})",
       "chat.mapDetails":
         "difficoltà {difficultyLower}, dimensione {sizeLower}, {players} giocatori, seme {seed}",
       "chat.resultBeat": "{name} ha vinto una sfida al round {round} • {map}",
@@ -674,6 +672,7 @@ export const I18N = (() => {
         "Il tuo nemico ha conquistato la maggior parte del territorio al round {round}.",
       "over.allConquered":
         "Tutti i tuoi regni sono stati conquistati al round {round}.",
+      "over.shareMap": "Condividi questa mappa",
       "over.newGame": "Nuova partita",
       "over.mainMenu": "Menu principale",
       "list.intro":
@@ -802,7 +801,6 @@ export const I18N = (() => {
       "chat.sharedChallenge":
         "{name} ha compartido un reto • dificultad {difficultyLower}, tamaño {sizeLower}, {players} jugadores, semilla {seed}",
       "chat.sharedDaily": "{name} ha compartido el reto del día ({date})",
-      "chat.joinDaily": "{name} se ha unido al reto del día ({date})",
       "chat.mapDetails":
         "dificultad {difficultyLower}, tamaño {sizeLower}, {players} jugadores, semilla {seed}",
       "chat.resultBeat": "{name} ha ganado un reto en la ronda {round} • {map}",
@@ -855,6 +853,7 @@ export const I18N = (() => {
         "Tu enemigo ha conquistado la mayor parte del territorio en la ronda {round}.",
       "over.allConquered":
         "Todos tus reinos han sido conquistados en la ronda {round}.",
+      "over.shareMap": "Compartir este mapa",
       "over.newGame": "Nueva partida",
       "over.mainMenu": "Menú principal",
       "list.intro":
@@ -983,7 +982,6 @@ export const I18N = (() => {
       "chat.sharedChallenge":
         "{name} partilhou um desafio • dificuldade {difficultyLower}, tamanho {sizeLower}, {players} jogadores, semente {seed}",
       "chat.sharedDaily": "{name} partilhou o desafio do dia ({date})",
-      "chat.joinDaily": "{name} entrou no desafio do dia ({date})",
       "chat.mapDetails":
         "dificuldade {difficultyLower}, tamanho {sizeLower}, {players} jogadores, semente {seed}",
       "chat.resultBeat": "{name} ganhou um desafio na ronda {round} • {map}",
@@ -1034,6 +1032,7 @@ export const I18N = (() => {
         "O teu inimigo conquistou a maioria do território na ronda {round}.",
       "over.allConquered":
         "Todos os teus reinos foram conquistados na ronda {round}.",
+      "over.shareMap": "Partilhar este mapa",
       "over.newGame": "Novo jogo",
       "over.mainMenu": "Menu principal",
       "list.intro":

@@ -183,49 +183,31 @@ const DeepLink = {
     density: "x",
   },
 
-  // Builds the href for an update payload, or null if the payload has no game
-  // setup to open.
+  // Builds the href for a payload, or null if it has no complete setup.
   forPayload(p) {
     if (!p || typeof p !== "object") return null;
-    const day = p.daily || Daily.fromId(p.id);
-    if (day) {
-      if (p.t !== "challenge" && p.t !== "result") return null;
-      return "index.html?t=daily&d=" + encodeURIComponent(Daily.seed(day));
-    }
-    if (p.t !== "challenge" && p.t !== "result") return null;
-    const f = DeepLink.FIELDS;
     const q = [];
-    if (p.seed != null) q.push(f.seed + "=" + encodeURIComponent(p.seed));
     for (const k of [
+      "seed",
       "playerCount",
       "humanIndex",
       "botLevel",
       "mapSize",
       "density",
     ]) {
-      if (p[k] != null) q.push(f[k] + "=" + encodeURIComponent(p[k]));
+      if (p[k] != null)
+        q.push(DeepLink.FIELDS[k] + "=" + encodeURIComponent(p[k]));
     }
-    if (q.length < 6) return null; // without the full setup the link is useless
-    if (p.id != null) q.push("id=" + encodeURIComponent(String(p.id)));
-    return "index.html?t=" + p.t + "&" + q.join("&");
+    if (q.length < 6) return null;
+    return "index.html?" + q.join("&");
   },
 
   parse() {
     try {
       const url = new URL(window.location.href);
       let params = url.searchParams;
-      if (!params.get("t") && url.hash.length > 1)
+      if (!params.get(DeepLink.FIELDS.seed) && url.hash.length > 1)
         params = new URLSearchParams(url.hash.slice(1));
-      const t = params.get("t");
-      if (!t) return null;
-      if (t !== "challenge" && t !== "result" && t !== "daily") return null;
-      if (t === "daily") {
-        // "d" is the seed here, not the difficulty: Daily.fromSeed turns it back
-        // into the date and Daily.SETUP supplies the rest of the setup.
-        const day = Daily.fromSeed(params.get("d"));
-        if (!day) return null;
-        return { t, id: Daily.id(day), cfg: DeepLink.dailyCfg(day) };
-      }
       const f = DeepLink.FIELDS;
       const num = (v) =>
         v != null && v !== "" && isFinite(parseInt(v, 10))
@@ -246,25 +228,11 @@ const DeepLink = {
         cfg.botLevel &&
         cfg.mapSize &&
         cfg.density;
-      return { t, id: params.get("id") || null, cfg: complete ? cfg : null };
+      if (!complete) return null;
+      return { seed: cfg.seed, cfg };
     } catch (e) {
       return null;
     }
-  },
-
-  dailyCfg(day) {
-    const meta = Daily.meta(day);
-    return {
-      id: meta.id,
-      daily: day,
-      seed: meta.seed,
-      playerCount: meta.playerCount,
-      humanIndex: meta.humanIndex,
-      botLevel: meta.botLevel,
-      mapSize: meta.mapSize,
-      density: meta.density,
-      landMass: meta.landMass,
-    };
   },
 
   // Applies a parsed target.
@@ -275,30 +243,40 @@ const DeepLink = {
   // posted back to the chat exactly as if Play had been pressed.
   apply(target) {
     if (!target || !target.cfg) return false;
-    // Opening a daily link must behave exactly like picking "Challenge of the
-    // Day" from the menu: same dialog, same lock, same result reporting.
-    if (target.t === "daily") return Setup.openDaily(target.cfg.daily);
+    const day = Daily.dateOf(target.cfg.seed);
+    if (day) return Setup.openDaily(day);
     hideAllOverlays();
     show("setup");
-    Setup.prefill(Object.assign({ id: target.id }, target.cfg), target.t);
+    Setup.prefill(target.cfg, "challenge");
     return true;
   },
 };
 
 // ---------------------------------------------------------------------------
-// Challenge of the day. The seed is derived from the UTC date, so everyone in
-// the chat plays the same map on the same day without any coordination.
-//
-// UTC on purpose: a local-time seed would give players in different time zones
-// different maps for the same calendar day, and the chat line names the day.
-//
-// 2026-01-01 -> seed 20260101, id "daily-2026-01-01", label "1/1/2026"
+// Challenge of the day. The seed is the UTC date, so everyone in the chat plays
+// the same map on the same day. The seed is also what tells a daily apart: a
+// daily is exactly 8 digits (YYYYMMDD), a random seed is longer.
 // ---------------------------------------------------------------------------
 const Daily = {
-  ID_PREFIX: "daily-",
+  SEED_LENGTH: 8,
 
-  // Canonical "Y-M-D". Accepts a Date, an already normalised key (so callers
-  // can pass either without caring) or nothing for today.
+  // "Y-M-D" of a daily seed, or null if the value is not a daily.
+  dateOf(seed) {
+    const str = String(seed == null ? "" : seed).trim();
+    if (str.length !== Daily.SEED_LENGTH || !/^\d+$/.test(str)) return null;
+    const y = Number(str.slice(0, 4));
+    const m = Number(str.slice(4, 6));
+    const d = Number(str.slice(6, 8));
+    if (y < 1970 || m < 1 || m > 12 || d < 1 || d > 31) return null;
+    return y + "-" + m + "-" + d;
+  },
+
+  isDaily(seed) {
+    return Daily.dateOf(seed) != null;
+  },
+
+  // Canonical "Y-M-D". Accepts a Date, an already normalised key or nothing for
+  // today.
   key(d) {
     if (typeof d === "string") {
       const s = d.trim();
@@ -306,7 +284,7 @@ const Daily = {
         const [y, m, day] = s.split("-").map(Number);
         return y + "-" + m + "-" + day;
       }
-      return Daily.fromSeed(s) || Daily.key();
+      return Daily.dateOf(s) || Daily.key();
     }
     const t = d instanceof Date ? d : new Date();
     return (
@@ -326,37 +304,13 @@ const Daily = {
     return `${d}/${m}/${y}`;
   },
 
-  id(key) {
-    return Daily.ID_PREFIX + key;
-  },
-
-  // The date a challenge id belongs to, or null if it is not a daily challenge.
-  fromId(id) {
-    return typeof id === "string" && id.indexOf(Daily.ID_PREFIX) === 0
-      ? id.slice(Daily.ID_PREFIX.length)
-      : null;
-  },
-
-  // A shared daily link carries a date, but a payload written by an older
-  // version of the app (or by a client that only knows the seed) may carry the
-  // numeric seed instead. Accept both and return the normalised "Y-M-D" key.
-  fromSeed(v) {
-    if (v == null || v === "") return null;
-    const str = String(v).trim();
-    if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(str)) {
-      const [y, m, d] = str.split("-").map(Number);
-      if (m >= 1 && m <= 12 && d >= 1 && d <= 31) return y + "-" + m + "-" + d;
-      return null;
-    }
-    const n = parseInt(str, 10);
-    if (!isFinite(n) || n <= 0) return null;
-    // the seed reads as a date: YYYYMMDD
-    const y = Math.floor(n / 10000),
-      m = Math.floor((n % 10000) / 100),
-      d = n % 100;
-    if (y >= 1970 && y <= 9999 && m >= 1 && m <= 12 && d >= 1 && d <= 31)
-      return y + "-" + m + "-" + d;
-    return null;
+  // A random seed is 13 digits like the original game's currentTimeMillis(),
+  // which can never be mistaken for an 8-digit daily.
+  randomSeed() {
+    const now = Date.now();
+    return String(now).length === 13
+      ? now
+      : 1000000000000 + (now % 9000000000000);
   },
 
   // Fixed part of the daily: 5 enemies (6 players), medium size, compact.
@@ -391,8 +345,6 @@ const Daily = {
     const k = key || Daily.key();
     return Object.assign(
       {
-        id: Daily.id(k),
-        daily: k,
         seed: Daily.seed(k),
         landMass: MAP_SIZES.MEDIUM,
         created: Date.now(),
@@ -429,38 +381,29 @@ const Chat = {
   handleUpdate(update) {
     const p = update && update.payload;
     if (!p || typeof p !== "object") return;
-    if (p.t === "daily" && p.daily) {
-      // A peer started today's map. Register it so the challenge list and any
-      // later result line can describe it, but do not count it as unseen: it is
-      // not a map to hand out.
-      if (!Chat.challenges.has(p.id)) {
-        Chat.challenges.set(p.id, {
-          meta: Daily.meta(p.daily),
-          results: [],
-          daily: true,
-        });
-      }
-      return;
-    }
+    const id = Chat.idFor(p);
+    if (id == null) return;
     if (p.t === "challenge") {
-      const c = Chat.challenges.get(p.id) || { results: [] };
+      const c = Chat.challenges.get(id) || { results: [] };
       c.meta = {
-        id: p.id,
+        seed: p.seed,
         creator: p.creator || "?",
         creatorAddr: p.creatorAddr || (c.meta && c.meta.creatorAddr) || null,
-        seed: p.seed,
         playerCount: p.playerCount,
         botLevel: p.botLevel,
         mapSize: p.mapSize,
         density: p.density,
         humanIndex: p.humanIndex,
-        daily: p.daily || Daily.fromId(p.id) || null,
         created: p.created || 0,
       };
-      Chat.challenges.set(p.id, c);
+      Chat.challenges.set(id, c);
       if (App.gs == null) UI.updateChallengeBadge();
     } else if (p.t === "result") {
-      const c = Chat.challenges.get(p.id);
+      let c = Chat.challenges.get(id);
+      if (!c && Daily.dateOf(id)) {
+        c = { meta: Daily.meta(Daily.dateOf(id)), results: [] };
+        Chat.challenges.set(id, c);
+      }
       if (!c) return;
       // one result per player and challenge (keep the best/earliest)
       // one result per player *and mode*: a daily lets people pick a difficulty,
@@ -528,12 +471,17 @@ const Chat = {
   // de-duplicated local application of an update (own sends + listener)
   applied: new Set(),
   applySeen(payload) {
-    const key = payload && payload.t === "challenge" ? "c:" + payload.id : null;
+    const key =
+      payload && payload.t === "challenge" ? "c:" + Chat.idFor(payload) : null;
     if (key) {
       if (Chat.applied.has(key)) return;
       Chat.applied.add(key);
     }
     Chat.handleUpdate({ payload });
+  },
+
+  idFor(p) {
+    return p && p.seed != null ? String(p.seed) : null;
   },
 
   describeMap(meta) {
@@ -546,7 +494,7 @@ const Chat = {
   },
 
   challengeInfoText(meta) {
-    const day = (meta && meta.daily) || Daily.fromId(meta && meta.id);
+    const day = Daily.dateOf(meta && meta.seed);
     if (day)
       return t("chat.sharedDaily", {
         name: Chat.selfName,
@@ -561,12 +509,12 @@ const Chat = {
     });
   },
 
-  resultInfoText(meta, victory, round, aborted) {
+  resultInfoText(setup, victory, round, aborted) {
     const key = aborted ? "GaveUp" : victory ? "Beat" : "Lost";
-    const day = (meta && meta.daily) || Daily.fromId(meta && meta.id);
+    const day = Daily.dateOf(setup && setup.seed);
     if (day) {
       // "Foo beat the challenge of the day (1/1/2026) in hard mode"
-      const lvl = meta && (meta.mode || meta.botLevel);
+      const lvl = setup && (setup.mode || setup.botLevel);
       const modeSuffix = lvl
         ? t("mode.suffix", {
             mode: (INTELLIGENCE[Daily.difficultyOf(lvl)] || {}).name || "?",
@@ -578,8 +526,7 @@ const Chat = {
         modeSuffix,
       }).replace(/\s+$/, "");
     }
-    // without a known challenge there are no map details to show
-    if (!meta) {
+    if (!setup) {
       return aborted
         ? t("chat.resultGaveUpShort", { name: Chat.selfName })
         : t("chat.result" + key + "Short", { name: Chat.selfName, round });
@@ -587,7 +534,7 @@ const Chat = {
     return t("chat.result" + key, {
       name: Chat.selfName,
       round,
-      map: Chat.describeMap(meta),
+      map: Chat.describeMap(setup),
     });
   },
 
@@ -602,59 +549,27 @@ const Chat = {
     );
   },
 
-  // Announce that the player started today's map. No href and no "challenge"
-  // payload: the day is the challenge, so there is nothing to hand out - only a
-  // line in the chat and a result to compare later.
-  sendDailyJoin(day) {
-    // The join line is not a challenge or a result, so it gets no href: there
-    // is nothing to open that the "Challenge of the Day" button would not open.
-    // The seed is still in the payload so a reader can tell which map it was.
-    return Chat.send(
-      {
-        t: "daily",
-        id: Daily.id(day),
-        daily: day,
-        seed: Daily.seed(day),
-        addr: Chat.selfAddr,
-        name: Chat.selfName,
-        created: Date.now(),
-      },
-      t("chat.joinDaily", { name: Chat.selfName, date: Daily.label(day) }),
-    );
-  },
-
-  // `mode` is the difficulty actually played (a daily allows changing it).
-  sendResult(id, victory, round, aborted, mode) {
-    // A result is posted against a known challenge, so merge that challenge's
-    // setup into the payload: the href then carries everything needed to open
-    // the New Game dialog, and a peer that missed the original challenge can
-    // still start it from the result message.
+  sendResult(id, victory, round, aborted, mode, cfgIn) {
     const c = id ? Chat.challenges.get(id) : null;
-    const meta = c && c.meta ? c.meta : null;
-    const day = (meta && meta.daily) || Daily.fromId(id);
-    const setup = meta
+    const cfg = cfgIn || (c && c.meta) || null;
+    const setup = cfg
       ? {
-          seed: meta.seed,
-          playerCount: meta.playerCount,
-          humanIndex: meta.humanIndex,
-          botLevel: meta.botLevel,
-          mapSize: meta.mapSize,
-          density: meta.density,
+          seed: cfg.seed,
+          playerCount: cfg.playerCount,
+          humanIndex: cfg.humanIndex,
+          botLevel: cfg.botLevel,
+          mapSize: cfg.mapSize,
+          density: cfg.density,
         }
       : {};
-    if (day) {
-      setup.daily = day;
-      if (mode) {
-        // report the difficulty that was really played, not the challenge default
-        setup.mode = mode;
-        setup.botLevel = mode;
-      }
+    if (Daily.dateOf(setup.seed) && mode) {
+      setup.mode = mode;
+      setup.botLevel = mode;
     }
     return Chat.send(
       Object.assign(
         {
           t: "result",
-          id,
           addr: Chat.selfAddr,
           name: Chat.selfName,
           victory,
@@ -664,12 +579,7 @@ const Chat = {
         },
         setup,
       ),
-      Chat.resultInfoText(
-        mode && day ? Object.assign({}, meta, { mode }) : meta,
-        victory,
-        round,
-        aborted,
-      ),
+      Chat.resultInfoText(setup, victory, round, aborted),
     );
   },
 
@@ -762,8 +672,7 @@ const Flow = {
       return;
     }
     let seed = parseInt($("seed-input").value, 10);
-    if (!isFinite(seed) || seed < 0) seed = Date.now() >>> 0;
-    seed = seed >>> 0;
+    if (!isFinite(seed) || seed < 0) seed = Daily.randomSeed();
     const cfg = {
       seed,
       playerCount: count,
@@ -773,18 +682,16 @@ const Flow = {
       density: Setup.values.density,
       landMass: MAP_SIZES[Setup.values.mapsize],
     };
-    // Opened from a challenge link: if nothing was changed, play it as that
-    // challenge so the result is reported back to the chat. The id from the
-    // message is used verbatim rather than recomputed. Editing any value turns
-    // it back into a normal game.
+    // Opened from a link: if nothing was changed, play it as that map so the
+    // result is reported back to the chat. Editing any value turns it back into
+    // a normal game.
     let challenge = null;
-    let daily = null;
     const link = Setup.challenge;
     if (link && link.cfg) {
       const c = link.cfg;
-      const isDaily = link.kind === "daily";
       // A daily lets the player pick the difficulty; that choice is reported in
       // the chat line, so it must not count as "the setup was changed".
+      const isDaily = Daily.isDaily(c.seed);
       const same =
         c.seed === cfg.seed &&
         c.playerCount === cfg.playerCount &&
@@ -792,16 +699,10 @@ const Flow = {
         (isDaily || c.botLevel === cfg.botLevel) &&
         c.mapSize === cfg.mapSize &&
         Setup.densityName(c.density) === Setup.densityName(cfg.density);
-      if (same) {
-        challenge = link.id || null;
-        if (isDaily) daily = c.daily || Daily.fromId(link.id);
-      }
+      if (same) challenge = Flow.makeChallengeId(cfg);
     }
     Setup.setMode(false);
     this.beginGame(cfg, challenge);
-    // tell the chat that someone else played today's map, without sending a
-    // "challenge" update: the challenge is the date, not something to share
-    if (daily) Chat.sendDailyJoin(daily);
   },
 
   beginGame(cfg, challenge) {
@@ -822,11 +723,20 @@ const Flow = {
     if (App.gs.challengeId) Flow.announceChallenge();
   },
 
-  // True while the running game is the challenge of the day. The challenge id
-  // is the day either way, so this is only about what may be shared.
+  // True while the running game is the challenge of the day.
   isDaily(gs) {
     const g = gs || App.gs;
-    return !!(g && g.challengeId && Daily.fromId(g.challengeId));
+    return !!(g && g.config && Daily.isDaily(g.config.seed));
+  },
+
+  // Is this map already in the chat? Either it was played from a link, or a
+  // challenge for its seed is known. Dailies are in every chat by definition.
+  alreadyShared(gs) {
+    const g = gs || App.gs;
+    if (!g || !g.config) return false;
+    if (Flow.isDaily(g)) return true;
+    if (g.challengeId != null) return true;
+    return Chat.challenges.has(Flow.makeChallengeId(g.config));
   },
 
   // Build the payload for "I beat this map in round N — can you?"
@@ -834,7 +744,6 @@ const Flow = {
     const cfg = gs.config;
     if (!cfg) return null;
     return {
-      id: Flow.makeChallengeId(cfg),
       seed: cfg.seed,
       playerCount: cfg.playerCount,
       botLevel: cfg.botLevel,
@@ -1033,8 +942,15 @@ const Flow = {
     if (!id) return false;
     if (App.challengeReported) return false;
     App.challengeReported = true;
-    const mode = App.gs && App.gs.config ? App.gs.config.botLevel : null;
-    const sent = Chat.sendResult(id, victory, round, aborted, mode);
+    const cfg = (App.gs && App.gs.config) || null;
+    const sent = Chat.sendResult(
+      id,
+      victory,
+      round,
+      aborted,
+      cfg && cfg.botLevel,
+      cfg,
+    );
     const c = Chat.challenges.get(id);
     if (c) UI.renderChallengeList && UI.renderChallengeList();
     return sent;
@@ -1244,25 +1160,16 @@ const Flow = {
       return false;
     }
     if (!Chat.sendChallenge(meta)) return false;
-    gs.challengeId = meta.id;
-    if (gs.config) gs.config.challengeId = meta.id;
+    gs.challengeId = Flow.makeChallengeId(meta);
+    if (gs.config) gs.config.challengeId = gs.challengeId;
     App.challengeReported = false;
     toast(t("toast.challengeShared"));
     Flow.saveGame();
     return true;
   },
 
-  // The id is derived only from the map-determining settings, so every peer
-  // that plays the same challenge sees the same id.
   makeChallengeId(cfg) {
-    return [
-      cfg.seed,
-      cfg.playerCount,
-      cfg.humanIndex,
-      cfg.botLevel,
-      cfg.mapSize,
-      cfg.density,
-    ].join("-");
+    return String(cfg.seed);
   },
 };
 
@@ -1314,7 +1221,7 @@ const Setup = {
     Setup.saved = Object.assign({}, Setup.values);
     Setup.challenge =
       kind === "challenge"
-        ? { id: cfg.id, cfg: Object.assign({}, cfg), kind: "shared" }
+        ? { cfg: Object.assign({}, cfg), kind: "shared" }
         : null;
     Setup.values.difficulty = cfg.botLevel;
     Setup.values.mapsize = cfg.mapSize;
@@ -1344,7 +1251,7 @@ const Setup = {
   // it like any other daily.
   openDaily(day) {
     const meta = Daily.meta(day || Daily.key());
-    Setup.prefill(Object.assign({ id: meta.id }, meta), "challenge");
+    Setup.prefill(meta, "challenge");
     Setup.challenge.kind = "daily";
     hide("menu");
     show("setup");
@@ -1406,7 +1313,9 @@ const Setup = {
     const title = $("setup-title");
     // A link may open another day than today's, so name the day it really is.
     const dailyDay =
-      on === "daily" && Setup.challenge ? Setup.challenge.cfg.daily : null;
+      on === "daily" && Setup.challenge
+        ? Daily.dateOf(Setup.challenge.cfg.seed)
+        : null;
     if (title) {
       title.textContent =
         on === "daily"
@@ -1512,14 +1421,11 @@ const Setup = {
   syncSeedUi(forceNew) {
     const input = $("seed-input");
     if (forceNew || !input.value || input.value === "0") {
-      // Date.now() alone repeats when the button is pressed twice within the
-      // same millisecond (and can repeat across restarts), which would bring
-      // back the very bug of playing the same island twice.
-      let seed = 0;
-      for (let i = 0; i < 8; i++) {
-        seed = Math.floor(Math.random() * 1e9);
-        if (String(seed) !== input.value) break;
-      }
+      // 13 digits like the original game. Retry on the rare same-millisecond
+      // repeat so two New Games never share an island.
+      let seed = Daily.randomSeed();
+      for (let i = 0; i < 8 && String(seed) === input.value; i++)
+        seed = Daily.randomSeed();
       input.value = String(seed);
     }
   },
@@ -1739,8 +1645,8 @@ const UI = {
     this._hintTimer = setTimeout(() => hint.classList.add("hidden"), 3200);
   },
 
-  showGameOver(humanLost) {
-    if (App.gameOverShown) return;
+  showGameOver(humanLost, redraw) {
+    if (App.gameOverShown && !redraw) return;
     App.gameOverShown = true;
     const gs = App.gs;
     const human = Flow.human();
@@ -1768,6 +1674,7 @@ const UI = {
     }
     $("gameover-title").textContent = title;
     $("gameover-text").textContent = text;
+    Flow.reportChallengeEnd(humanWon, winRound, false);
     const buttons = $("gameover-buttons");
     buttons.innerHTML = "";
     const add = (label, cls, action) => {
@@ -1777,21 +1684,19 @@ const UI = {
       b.onclick = action;
       buttons.appendChild(b);
     };
+    if (!Flow.alreadyShared(gs)) {
+      add(t("over.shareMap"), "primary", () => {
+        if (!Flow.shareCurrentChallenge()) return;
+        UI.showGameOver(humanLost, true);
+      });
+    }
     add(t("over.newGame"), "", () => {
-      Store.remove("save");
-      Store.remove("game");
-      Flow.clearUndo();
-      App.gs = null;
-      showOverlayOnly("setup");
+      flowLeaveGame("setup");
       Setup.setMode(false);
       Setup.syncSeedUi(true);
     });
     add(t("over.mainMenu"), "subtle", () => {
-      Store.remove("save");
-      Store.remove("game");
-      Flow.clearUndo();
-      App.gs = null;
-      showOverlayOnly("menu");
+      flowLeaveGame("menu");
     });
     Store.remove("save");
     show("gameover");
@@ -1879,7 +1784,7 @@ const UI = {
       div.className = "challenge-item";
       const info = document.createElement("div");
       info.className = "info";
-      const day = m.daily || Daily.fromId(m.id);
+      const day = Daily.dateOf(m.seed);
       // A link may point at another day than today's. Only today's may be
       // played from here (an old day is settled), but the card still names it.
       const today = day === Daily.key();
@@ -1906,7 +1811,7 @@ const UI = {
           });
       info.appendChild(title);
       info.appendChild(meta);
-      const mine = Chat.bestFor(c.meta.id);
+      const mine = Chat.bestFor(String(c.meta.seed));
       if (mine) {
         const res = document.createElement("div");
         res.className = "meta";
@@ -1970,7 +1875,7 @@ const UI = {
             density: m.density,
             landMass: m.landMass || MAP_SIZES[m.mapSize] || 50,
           },
-          m.id,
+          String(m.seed),
         );
       };
       div.appendChild(play);
@@ -1984,6 +1889,14 @@ function mapSizeName(size) {
   const key = "size." + size;
   const name = t(key);
   return name === key ? size : name;
+}
+
+function flowLeaveGame(overlay) {
+  Store.remove("save");
+  Store.remove("game");
+  Flow.clearUndo();
+  App.gs = null;
+  showOverlayOnly(overlay);
 }
 
 // ---------------------------------------------------------------------------

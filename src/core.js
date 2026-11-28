@@ -508,7 +508,7 @@ const GameStateHelper = {
 
   // ---------- map generation ----------
   initializeMap(gs, players, landMass, density, vegetationDensity, mapSeed) {
-    if (mapSeed == null) mapSeed = Date.now() >>> 0;
+    if (mapSeed == null) mapSeed = Date.now();
     if (vegetationDensity == null)
       vegetationDensity = DEAFULT_INITIAL_TREE_DENSITY;
     // the UI stores the density by name (LOOSE/MEDIUM/DENSE); the generator
@@ -516,7 +516,7 @@ const GameStateHelper = {
     if (typeof density === "string" && DENSITIES[density] != null)
       density = DENSITIES[density];
     gs.density = density;
-    gs.seed = mapSeed >>> 0;
+    gs.seed = mapSeed;
     gs.players = players;
     gs.tiles = [];
     gs.kingdoms = [];
